@@ -15,8 +15,12 @@ void main() async {
   final logoFile = File('assets/icon/logo_white.png').readAsBytesSync();
   final logo = decodeImage(logoFile)!;
 
+  // Trim the whitespace from the logo
+  final trimRect = findTrim(logo);
+  final trimmedLogo = copyCrop(logo, x: trimRect[0], y: trimRect[1], width: trimRect[2], height: trimRect[3]);
+
   // Resize the logo
-  final resizedLogo = copyResize(logo, width: logoSize, height: logoSize);
+  final resizedLogo = copyResize(trimmedLogo, width: logoSize, height: logoSize);
 
   // Calculate the position to center the logo
   final x = (imageSize - resizedLogo.width) ~/ 2;
