@@ -5,7 +5,7 @@ void main() async {
   // Define colors and sizes
   final backgroundColor = ColorRgb8(0xF0, 0x44, 0x21);
   const imageSize = 1024;
-  final logoSize = (imageSize * 0.75).round();
+  final logoSize = (imageSize * 0.66).round();
 
   // Create the background image
   final background = Image(width: imageSize, height: imageSize);
