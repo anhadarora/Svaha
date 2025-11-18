@@ -1,0 +1,9 @@
+kiteconnect
+pandas
+numpy
+scikit-learn
+tensorflow
+kivy
+kivymd==1.1.1
+requests
+watchdog
