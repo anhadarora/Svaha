@@ -4,7 +4,7 @@
 
 ---
 
-### 13:39 AM | November 18, 2025 | Tuesday| Home
+### 1:39 AM | November 18, 2025 | Tuesday | Home
 
 ## KivyMD vs Flutter for Backtesting MVP
 
@@ -44,3 +44,16 @@
 ### Decision: Settled on KivyMD
 
 ---
+
+---
+
+### 5:35 PM | November 18, 2025 | Tuesday | Home
+
+## Started working on Python MVP
+
+1. Updated new code structure to github
+2. Made skeleton project for KivyMD
+3. Subscribed to Zerodha Historical API
+4. Integrated Zerodha API with project
+5. integrated auto-project restart in project on code-changes without restarting debug session
+6. Persisting Zerodha login across debug sessions
