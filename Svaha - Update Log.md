@@ -57,3 +57,14 @@
 4. Integrated Zerodha API with project
 5. integrated auto-project restart in project on code-changes without restarting debug session
 6. Persisting Zerodha login across debug sessions
+
+---
+
+---
+
+### 11:36 PM | November 22, 2025 | Saturday | Home
+
+## Building Download Screen and Backend
+
+1. Shifted login logic to the User Screen.
+2. Added dock for navigation between Downloader, Trainer, and Backtester Screens.

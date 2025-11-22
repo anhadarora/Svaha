@@ -4,7 +4,7 @@ from kivy.uix.scrollview import ScrollView
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
-from kivymd.uix.button import MDFillRoundFlatIconButton
+from kivymd.uix.button import MDFillRoundFlatIconButton, MDIconButton
 from kivymd.uix.label import MDLabel
 from kivymd.uix.datatables import MDDataTable
 from kivymd.uix.toolbar import MDTopAppBar
@@ -16,14 +16,15 @@ from api.auth_server import AuthServer
 class Tab(MDBoxLayout, MDTabsBase):
     '''Class implementing content for a tab.'''
 
-class Dashboard(MDScreen):
+class UserScreen(MDScreen):
     def __init__(self, **kwargs):
-        super(Dashboard, self).__init__(**kwargs)
-        self.name = "dashboard"
+        super(UserScreen, self).__init__(**kwargs)
+        self.name = "user"
         
         self.layout = MDBoxLayout(orientation='vertical')
         
-        self.toolbar = MDTopAppBar(title="Svaha")
+        self.toolbar = MDTopAppBar(title="User")
+        self.toolbar.left_action_items = [["arrow-left", lambda x: self.go_back()]]
         self.layout.add_widget(self.toolbar)
 
         self.scroll_view = ScrollView()
@@ -59,23 +60,12 @@ class Dashboard(MDScreen):
         self.scroll_view.add_widget(self.content_layout)
         self.layout.add_widget(self.scroll_view)
 
-        # Action Buttons
-        self.action_buttons_layout = MDBoxLayout(orientation='horizontal', spacing=dp(10), adaptive_height=True, size_hint_y=None, height=dp(50), padding=dp(10))
-        self.data_button = MDFillRoundFlatIconButton(text="Fetch", icon="database-arrow-down", on_release=self.fetch_data, disabled=True)
-        self.train_button = MDFillRoundFlatIconButton(text="Train", icon="robot", on_release=self.train_models, disabled=True)
-        self.test_button = MDFillRoundFlatIconButton(text="Test", icon="test-tube", on_release=self.test_models, disabled=True)
-        self.report_button = MDFillRoundFlatIconButton(text="Report", icon="chart-bar", on_release=self.generate_report, disabled=True)
-        
-        self.action_buttons_layout.add_widget(self.data_button)
-        self.action_buttons_layout.add_widget(self.train_button)
-        self.action_buttons_layout.add_widget(self.test_button)
-        self.action_buttons_layout.add_widget(self.report_button)
-        self.layout.add_widget(self.action_buttons_layout)
-
         self.add_widget(self.layout)
 
         self.try_auto_login()
 
+    def go_back(self):
+        self.manager.current = "main"
 
     def try_auto_login(self):
         print("Attempting to auto-login...")
@@ -121,8 +111,8 @@ class Dashboard(MDScreen):
     def update_status(self, message, success, margins=None, positions=None, holdings=None):
         if success:
             self.content_layout.remove_widget(self.login_card)
-            self.enable_buttons()
             self.update_dashboard(margins, positions, holdings)
+            self.manager.get_screen('main').update_user_icon(True)
         else:
             self.login_label.text = message
 
@@ -183,22 +173,3 @@ class Dashboard(MDScreen):
         tab_layout.add_widget(holdings_tab)
         
         self.data_layout.add_widget(tab_layout)
-
-
-    def enable_buttons(self):
-        self.data_button.disabled = False
-        self.train_button.disabled = False
-        self.test_button.disabled = False
-        self.report_button.disabled = False
-
-    def fetch_data(self, *args):
-        print("Fetching data...")
-
-    def train_models(self, *args):
-        print("Training models...")
-
-    def test_models(self, *args):
-        print("Testing models...")
-
-    def generate_report(self, *args):
-        print("Generating report...")
