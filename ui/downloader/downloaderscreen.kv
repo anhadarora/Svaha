@@ -1,0 +1,237 @@
+#:kivy 2.1.0
+
+<SymbolBrowserItem@MDBoxLayout>:
+    symbol: ''
+    adaptive_height: True
+    padding: "10dp"
+    spacing: "10dp"
+
+    MDLabel:
+        text: root.symbol
+        halign: "left"
+
+    MDIconButton:
+        icon: "plus"
+        on_release: app.root.get_screen('downloader').add_symbol_to_queue(root.symbol)
+
+<SymbolQueueItem@MDBoxLayout>:
+    symbol: ''
+    adaptive_height: True
+    padding: "10dp"
+    spacing: "10dp"
+
+    MDLabel:
+        text: root.symbol
+        halign: "left"
+
+    MDIconButton:
+        icon: "minus"
+        on_release: app.root.get_screen('downloader').remove_symbol_from_queue(root.symbol)
+
+<DownloaderScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+        padding: "10dp"
+        spacing: "10dp"
+
+        # --- Section 1: Symbol Selection ---
+        MDBoxLayout:
+            id: symbol_selection_area
+            orientation: 'horizontal'
+            spacing: "10dp"
+            size_hint_y: 0.5 if not root.is_resume_mode else None
+            height: 0 if root.is_resume_mode else self.height
+            opacity: 1 if not root.is_resume_mode else 0
+
+            # Left Pane: Browser
+            MDBoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.6
+
+                MDLabel:
+                    text: "Symbol Browser"
+                    font_style: "H6"
+                    adaptive_height: True
+
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: "5dp"
+
+                    MDTextField:
+                        id: search_filter
+                        hint_text: "Search Symbol"
+                        on_text: root.filter_symbols()
+
+                    MDDropDownItem:
+                        id: sector_filter
+                        text: "All Sectors"
+                        focus_behavior: False
+                        on_press: root.log_dropdown_press('sector_filter')
+                        # Only open if the menu has been created
+                        on_release: root._open_dropdown_menu(root.sector_menu)
+
+                    MDDropDownItem:
+                        id: index_filter
+                        text: "All Indices"
+                        focus_behavior: False
+                        on_press: root.log_dropdown_press('index_filter')
+                        # Only open if the menu has been created
+                        on_release: root._open_dropdown_menu(root.index_menu)
+
+                RecycleView:
+                    id: available_symbols_rv
+                    data: [{'symbol': symbol} for symbol in root.available_symbols]
+                    viewclass: 'SymbolBrowserItem'
+                    RecycleBoxLayout:
+                        default_size: None, dp(48)
+                        default_size_hint: 1, None
+                        size_hint_y: None
+                        height: self.minimum_height
+                        orientation: 'vertical'
+
+            # Right Pane: Queue
+            MDBoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.4
+
+                MDLabel:
+                    id: selected_count_label
+                    text: root.selected_count_text
+                    font_style: "H6"
+                    adaptive_height: True
+
+                RecycleView:
+                    id: selected_symbols_rv
+                    data: [{'symbol': symbol} for symbol in root.selected_symbols]
+                    viewclass: 'SymbolQueueItem'
+                    RecycleBoxLayout:
+                        default_size: None, dp(48)
+                        default_size_hint: 1, None
+                        size_hint_y: None
+                        height: self.minimum_height
+                        orientation: 'vertical'
+
+        MDSeparator:
+
+        # --- Section 2: Time & Interval ---
+        MDBoxLayout:
+            orientation: 'horizontal'
+            adaptive_height: True
+            spacing: "10dp"
+
+            MDTextField:
+                id: start_date_field
+                hint_text: "Start Date"
+                mode: "rectangle"
+                on_touch_down: if self.collide_point(*args[1].pos): root.show_date_picker(self)
+
+            MDTextField:
+                id: end_date_field
+                hint_text: "End Date"
+                mode: "rectangle"
+                on_touch_down: if self.collide_point(*args[1].pos): root.show_date_picker(self)
+
+            MDDropDownItem:
+                id: interval_field
+                text: "day"
+                focus_behavior: False
+                on_press: root.log_dropdown_press('interval_field')
+                on_release: root._open_dropdown_menu(root.interval_menu)
+
+        # --- Section 3: Storage & Sharding ---
+        MDBoxLayout:
+            orientation: 'horizontal'
+            adaptive_height: True
+            spacing: "10dp"
+
+            MDBoxLayout:
+                adaptive_height: True
+                MDTextField:
+                    id: output_dir_field
+                    hint_text: "Output Directory"
+                    mode: "rectangle"
+                MDIconButton:
+                    icon: "folder-open"
+                    on_release: root.trigger_output_dir_chooser()
+
+            MDBoxLayout:
+                adaptive_width: True
+                spacing: "10dp"
+                MDLabel:
+                    text: "CSV"
+                    adaptive_width: True
+                MDCheckbox:
+                    id: save_csv_check
+                    active: True
+
+            MDBoxLayout:
+                adaptive_width: True
+                spacing: "10dp"
+                MDLabel:
+                    text: "Parquet"
+                    adaptive_width: True
+                MDCheckbox:
+                    id: save_parquet_check
+
+            MDDropDownItem:
+                id: sharding_field
+                text: "None"
+                focus_behavior: False
+                on_press: root.log_dropdown_press('sharding_field')
+                on_release: root._open_dropdown_menu(root.sharding_menu)
+
+        MDSeparator:
+
+        # --- Section 4: Execution & Logs ---
+        MDBoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.5
+
+            MDProgressBar:
+                id: progress_bar
+                value: 0
+
+            RecycleView:
+                id: log_view
+                data: root.logs
+                viewclass: 'OneLineListItem'
+                RecycleBoxLayout:
+                    default_size: None, dp(30)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+
+        MDBoxLayout:
+            adaptive_height: True
+            spacing: "10dp"
+
+            MDBoxLayout:
+                adaptive_width: True
+                spacing: "10dp"
+                MDLabel:
+                    text: "Resume Mode"
+                    adaptive_width: True
+                MDCheckbox:
+                    id: resume_check
+                    on_active: root.is_resume_mode = self.active
+
+            MDBoxLayout:
+                adaptive_height: True
+                MDTextField:
+                    id: manifest_file_field
+                    hint_text: "Select manifest.json"
+                    mode: "rectangle"
+                    disabled: not resume_check.active
+                    opacity: 1 if resume_check.active else 0
+                MDIconButton:
+                    icon: "file-document-outline"
+                    on_release: root.trigger_manifest_file_chooser()
+                    disabled: not resume_check.active
+                    opacity: 1 if resume_check.active else 0
+
+            MDRaisedButton:
+                id: start_button
+                text: "START DOWNLOAD"
+                on_release: root.start_download()
+                md_bg_color: app.theme_cls.primary_color

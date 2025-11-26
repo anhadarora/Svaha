@@ -68,3 +68,15 @@
 
 1. Shifted login logic to the User Screen.
 2. Added dock for navigation between Downloader, Trainer, and Backtester Screens.
+3. Complete UI implemented
+4. Download destination picker / file browser took 3 hours.
+
+---
+
+---
+
+### 2:32 AM | November 23, 2025 | Sunday | Home
+
+## Abandoned KivyMD and Switched to PySide6 / PyQt
+
+1.

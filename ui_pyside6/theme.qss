@@ -1,0 +1,28 @@
+QWidget {
+    background-color: #333;
+    color: #FFF;
+}
+
+QGroupBox {
+    font-weight: bold;
+}
+
+QToolBar {
+    background-color: #FF9800; /* Orange */
+}
+
+QTabWidget::pane {
+    border-top: 2px solid #FF9800; /* Orange */
+}
+
+QTabBar::tab:selected {
+    background: #FF9800; /* Orange */
+    color: #000;
+}
+
+QPushButton {
+    background-color: #FFC107; /* Amber */
+    color: #000;
+    padding: 10px;
+    border: none;
+}

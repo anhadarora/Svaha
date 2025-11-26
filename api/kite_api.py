@@ -2,6 +2,8 @@ import json
 import os
 import datetime
 from kiteconnect import KiteConnect
+from kiteconnect.exceptions import TokenException, NetworkException
+from .security import encrypt_data, decrypt_data, load_key
 try:
     from config import API_KEY, API_SECRET
 except ImportError:
@@ -21,6 +23,7 @@ class KiteAPI:
         self.api_secret = API_SECRET
         self.kite = KiteConnect(api_key=self.api_key)
         self.access_token = None
+        self.key = load_key()
 
     def set_access_token(self, access_token):
         self.access_token = access_token
@@ -35,14 +38,21 @@ class KiteAPI:
             self.set_access_token(data["access_token"])
             self.save_session(data)
             return data
+        except TokenException as e:
+            print(f"Error generating session: Invalid token - {e}")
+            return None
+        except NetworkException as e:
+            print(f"Error generating session: Network error - {e}")
+            return None
         except Exception as e:
-            print(f"Error generating session: {e}")
+            print(f"An unexpected error occurred during session generation: {e}")
             return None
 
     def save_session(self, data):
         try:
-            with open(SESSION_FILE, 'w') as f:
-                json.dump(data, f, default=json_serial)
+            encrypted_data = encrypt_data(json.dumps(data, default=json_serial).encode(), self.key)
+            with open(SESSION_FILE, 'wb') as f:
+                f.write(encrypted_data)
             print("Session data saved successfully.")
         except Exception as e:
             print(f"Error saving session: {e}")
@@ -50,11 +60,13 @@ class KiteAPI:
     def load_session(self):
         try:
             if os.path.exists(SESSION_FILE):
-                with open(SESSION_FILE, 'r') as f:
-                    data = json.load(f)
-                    self.set_access_token(data["access_token"])
-                    print(f"Session data loaded: {data}")
-                    return data
+                with open(SESSION_FILE, 'rb') as f:
+                    encrypted_data = f.read()
+                decrypted_data = decrypt_data(encrypted_data, self.key)
+                data = json.loads(decrypted_data)
+                self.set_access_token(data["access_token"])
+                print(f"Session data loaded.")
+                return data
             else:
                 print("No session file found.")
                 return None
@@ -70,6 +82,9 @@ class KiteAPI:
                 return True
             print("Session is invalid.")
             return False
+        except TokenException:
+            print("Session is invalid (TokenException).")
+            return False
         except Exception as e:
             print(f"Session validation failed: {e}")
             return False
@@ -77,36 +92,51 @@ class KiteAPI:
     def get_historical_data(self, instrument_token, from_date, to_date, interval):
         try:
             return self.kite.historical_data(instrument_token, from_date, to_date, interval)
-        except Exception as e:
+        except (TokenException, NetworkException) as e:
             print(f"Error fetching historical data: {e}")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred while fetching historical data: {e}")
             return None
 
     def get_instruments(self):
         try:
             return self.kite.instruments()
-        except Exception as e:
+        except (TokenException, NetworkException) as e:
             print(f"Error fetching instruments: {e}")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred while fetching instruments: {e}")
             return None
 
     def get_margins(self):
         try:
             return self.kite.margins()
-        except Exception as e:
+        except (TokenException, NetworkException) as e:
             print(f"Error fetching margins: {e}")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred while fetching margins: {e}")
             return None
 
     def get_positions(self):
         try:
             return self.kite.positions()
-        except Exception as e:
+        except (TokenException, NetworkException) as e:
             print(f"Error fetching positions: {e}")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred while fetching positions: {e}")
             return None
 
     def get_holdings(self):
         try:
             return self.kite.holdings()
-        except Exception as e:
+        except (TokenException, NetworkException) as e:
             print(f"Error fetching holdings: {e}")
+            return None
+        except Exception as e:
+            print(f"An unexpected error occurred while fetching holdings: {e}")
             return None
 
 kite_api = KiteAPI()
