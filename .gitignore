@@ -1,7 +1,7 @@
 # Ignore the config file with sensitive credentials
 config.py
-data/session.json
-data/encryption.key
+generated_data/session.json
+generated_data/encryption.key
 
 # Ignore python cache files
 __pycache__/

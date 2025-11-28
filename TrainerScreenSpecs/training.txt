@@ -1,0 +1,60 @@
+"During Training" (Live Monitoring Dashboard)
+
+This dashboard is for real-time visibility. Its purpose is to help you identify if a training run is behaving as expected, learning effectively, or failing, so you can stop it early. It should be dominated by live-updating plots.
+
+1. Run Status & Controls
+
+	•	Experiment Name: [Text Display] (e.g., "Run_10m_HeikenAshi_ViT_Heal_v2")
+	•	Current Status: [Text] (e.g., "RUNNING", "PAUSED", "COMPLETING EPOCH")
+	•	Elapsed Time: [Timer] (e.g., "01:23:45")
+	•	Control Buttons: [Button] (PAUSE, STOP TRAINING)
+
+2. Progress Indicators
+
+	•	Epoch Progress: [Text & Progress Bar] (e.g., "Epoch 12 / 100")
+	•	Batch Progress: [Text & Progress Bar] (e.g., "Batch 1,500 / 2,500")
+	•	Data Throughput: [Number] (e.g., "120 samples/sec")
+	•	Estimated Time Remaining (ETR): [Timer] (e.g., "03:15:10")
+
+3. Core Performance Plots (Live Updating)
+
+These plots show if the model is learning, in the most traditional sense.
+	•	Plot 1: Training Loss (per Batch)
+	◦	X-Axis: Batch Number (Step)
+	◦	Y-Axis: Loss Value
+	◦	Purpose: To see the raw learning progress. Should be decreasing and noisy.
+	•	Plot 2: Validation Loss (per Epoch)
+	◦	X-Axis: Epoch Number
+	◦	Y-Axis: Loss Value
+	◦	Purpose: To check for generalization. This is the most important plot for identifying overfitting (when this line starts to go up while training loss goes down).
+	•	Plot 3: Prediction Correctness (per Epoch, Train vs. Val)
+	◦	X-Axis: Epoch Number
+	◦	Y-Axis: Correctness Score (e.g., MeanCorrectness [0.0-1.0])
+	◦	Lines: Two lines (Training, Validation).
+	◦	Purpose: Shows if the model is actually getting better at predicting the true outcome, which (as you noted) is our "healing" signal.
+
+4. Dynamic System Monitor (The "Living" System Vitals)
+
+This is the most critical section for our unique architecture. It shows if the dynamic rotating plane and error correctionsystems are stable.
+	•	Plot 4: Frame Shift Error (Live)
+	◦	X-Axis: Batch Number (Step)
+	◦	Y-Axis: Angle (Degrees or Radians)
+	◦	Lines: Two lines: beta_1 * theta_PCA1 (PC1 Drift) and beta_2 * theta_PCA2 (PC2 Drift).
+	◦	Purpose: To monitor frame stability. If these lines are extremely noisy or spike wildly, it means our normalization window (N) might be too small or the market is too chaotic for the PCA to be stable.
+	•	Plot 5: Correction & Healing (Live)
+	◦	X-Axis: Batch Number (Step)
+	◦	Y-Axis 1: Correction Factor [0.0 - 1.0] (Line Plot)
+	◦	Y-Axis 2: Total Error (Rolling Mean) (Line Plot)
+	◦	Purpose: This is the "wound and healing" chart. We can watch the Total Error spike, see the Correction Factorramp up in response, and then (hopefully) see the Correction Factor decay back to zero as the model's Prediction Correctness (from Plot 3) improves and the error subsides.
+	•	Plot 6: Error Component Contribution (Live)
+	◦	X-Axis: Batch Number (Step)
+	◦	Y-Axis: Error Value (Stacked Bar or Area Chart)
+	◦	Components: Vector Distance Error, Vector Angle Error, Frame Shift Error.
+	◦	Purpose: To see why the Total Error is high. Is the model bad at predicting distance, direction, or is the frame itself just unstable?
+
+5. Live Snapshot Visualization
+
+	•	Image 1: Last Input Snapshot (Dynamic Plane): A visual rendering of the most recent [N x 2] dynamic plane image (or numeric matrix) fed into the model.
+	•	Image 2: Corresponding Static Chart: The original Heiken-Ashi/Candlestick chart for the same window, for human comparison.
+	•	Image 3: Predicted Output (if Image-to-Image): If we are predicting the next dynamic plane, show the model's visual output here.
+	•	Purpose: A real-time sanity check to visually confirm the transformation is working and the model is seeing what we think it's seeing.

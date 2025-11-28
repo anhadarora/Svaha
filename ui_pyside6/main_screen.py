@@ -1,10 +1,20 @@
 import sys
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QToolBar, QLabel, QSizePolicy
-from PySide6.QtGui import QAction
 
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import (
+    QLabel,
+    QMainWindow,
+    QSizePolicy,
+    QTabWidget,
+    QToolBar,
+    QVBoxLayout,
+    QWidget,
+)
+
+from ui_pyside6.backtester_screen import BacktesterScreen
 from ui_pyside6.downloader_screen import DownloaderScreen
 from ui_pyside6.trainer_screen import TrainerScreen
-from ui_pyside6.backtester_screen import BacktesterScreen
+
 
 class MainScreen(QMainWindow):
     def __init__(self, session_manager):
@@ -38,8 +48,9 @@ class MainScreen(QMainWindow):
         layout.addWidget(self.tab_widget)
 
         # Create the screens (as simple widgets for now)
-        self.downloader_screen = DownloaderScreen(session_manager=session_manager)
-        self.trainer_screen = TrainerScreen()
+        self.downloader_screen = DownloaderScreen(
+            session_manager=session_manager)
+        self.trainer_screen = TrainerScreen(session_manager=session_manager)
         self.backtester_screen = BacktesterScreen()
 
         # Add tabs to the tab widget
@@ -53,8 +64,10 @@ class MainScreen(QMainWindow):
         else:
             self.user_action.setText("User")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication
+
     app = QApplication(sys.argv)
     main_screen = MainScreen()
     main_screen.show()

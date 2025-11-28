@@ -1,4 +1,5 @@
-from api.kite_api import KiteAPI
+from api.kite.client import KiteAPI
+
 
 class SessionManager:
     def __init__(self, kite_api: KiteAPI):

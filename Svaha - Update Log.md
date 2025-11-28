@@ -66,6 +66,13 @@
 
 ## Building Download Screen and Backend
 
+**Brief note about why go for UI first approach, instead of CLI or Jupyter Notebook if the goal was getting to proof of concept ASAP:**
+
+1. CLI has no organisation. I would lose the time I supposedly saved from ignoring the UI and spent it on keeping track of haphazardly created files and downloads and script versios.
+2. Jupyter Notebook is too slow with neural networks. Jupyter doesn't use all available compute power like a terminal level script does.
+
+**Tasks:**
+
 1. Shifted login logic to the User Screen.
 2. Added dock for navigation between Downloader, Trainer, and Backtester Screens.
 3. Complete UI implemented
@@ -79,4 +86,26 @@
 
 ## Abandoned KivyMD and Switched to PySide6 / PyQt
 
-1.
+1. UI worked surprisingly well. Hopeful now.
+
+---
+
+---
+
+### 3:29 AM | November 27, 2025 | Thursday | Home
+
+1. Refactored files to remove KivyMD references.
+2. Scrip selection is better, with multiple select/deselect options.
+3. Parquet download is also working now.
+4. Downloaded file naming convention sorted. Using metadata.json to track constituent parameters of each download.
+5. Built UI for Trainer Screen: Accordion, Pre-training, Training, Post-Training, History.
+
+---
+
+---
+
+### 5:41 AM | November 28, 2025 | Friday | Home
+
+1. Finished initial UI for all sections of trainer Screen.
+2. Revised Trainer Screen UI to feel more like a proper dashboard, rather than a really long and complicated form.
+3.

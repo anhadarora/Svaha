@@ -1,0 +1,100 @@
+1. Data Source & Timeframe Parameters
+
+These parameters define the raw data feed before any processing.
+	•	Market Segment: Dropdown (e.g., "NSE Equities", "NFO", "MCX"). Default: NSE Equities.
+	•	Instrument List: Text Area or File Upload (e.g., "NIFTY50_stocks.csv", or manual list "RELIANCE, HDFCBANK, TCS").
+	•	Time Interval: Dropdown (e.g., "10-minute", "5-minute", "1-minute", "1-hour"). Default: 10-minute.
+	•	Chart Type: Dropdown ("Candlestick", "Heiken-Ashi"). This selection will determine the underlying OHLCV data used for subsequent calculations.
+	•	Training Date Range: Date-Range Picker (Start Date, End Date).
+	•	Validation Date Range: Date-Range Picker (Start Date, End Date).
+
+
+2. Dynamic Plane Transformation Parameters
+
+This is the core of your thought experiment, defining how we normalize and reconstruct the relational 2D plane from raw T-P-V (Time, Price, Volume) data.
+	•	Enable Dynamic Plane: Toggle (True/False). If False, the model reverts to using static candlestick images (Baseline).
+	•	Window Size (N): Integer Slider (e.g., 5 to 50). This is the number of past data points (candles) used to compute each new dynamic plane.
+	•	Time Normalization Method:
+	◦	Method: Dropdown ("Fractional Elapsed Time", "Linear Index").
+	◦	Range: Dropdown ("[0, 1]", "[-1, 1]"). As discussed, [-1, 1] is preferred.
+	•	Price Normalization Method:
+	◦	Method: Dropdown ("Log Return", "Percent Return"). Both are anchored to the start of the window.
+	◦	Clipping Threshold (Price): Dropdown (e.g., "None", "5th/95th Percentile", "1st/99th Percentile"). This controls how extreme price spikes are handled.
+	◦	Range: Dropdown ("[-1, 1]", "Raw Scaled").
+	•	Volume Normalization Method:
+	◦	Method: Dropdown ("Log-Transform + Robust Scaling (IQR)", "Log-Transform + Standard Scaling (Z-score)").
+	◦	Clipping Threshold (Volume): Dropdown (e.g., "None", "5th/95th Percentile").
+	◦	Range: Dropdown ("[-1, 1]", "Raw Scaled").
+	•	Basis Method: Dropdown ("PCA", "ICA", "Raw Normalized"). This determines how the 2 rotational axes (X', Y') are derived from the 3D (T, P, V) normalized data.
+
+
+3. Model Architecture Parameters
+
+These parameters define the "brain" that will read the input snapshot (either static or dynamic).
+	•	Input Format: Dropdown ("Image Snapshot", "Raw Numeric Vectors"). This dictates whether we render the dynamic plane as an image for a CNN/ViT or feed the N x 2 numeric coordinates directly.
+	•	Model Type: Dropdown ("Vision Transformer (ViT)", "Convolutional Neural Network (CNN)").
+	•	Sequence Handling (if ViT):
+	◦	Enable Sequential Input: Toggle (True/False). This activates the "Picture B -> Picture A" logic.
+	◦	Sequence Length (S): Integer Slider (e.g., 2 to 10). Number of dynamic snapshots to feed as a sequence.
+	◦	Sequence Handling Method: Dropdown ("Fixed Length", "Padding + Masking"). This corresponds to our discussion on Options A vs B.
+	•	Delta Features (if Sequential):
+	◦	Enable Delta Features: Toggle (True/False).
+	◦	Delta Method: Dropdown ("Feature Subtraction (Latent)", "Image Subtraction (Pixel)").
+	•	Network Hyperparameters:
+	◦	Learning Rate: Float Input (e.g., 0.001).
+	◦	Batch Size: Integer Input (e.g., 32).
+	◦	Epochs: Integer Input (e.g., 100).
+	◦	Optimizer: Dropdown ("Adam", "SGD", "RMSprop").
+
+
+
+4. Prediction Target (Label) Parameters
+
+This section defines what the model is trying to predict.
+	•	Prediction Target Type: Dropdown ( "Vectorial Movement (in Dynamic Plane)", "Image-to-Image (Next Dynamic Plane)", "Scalar Return (Regression)", "Signal Class (Buy/Sell/Hold)" ).
+	•	Prediction Horizon (H): Integer Slider (e.g., 1 to 10). How many steps (candles) into the future to predict.
+	•	Target (if Vectorial):
+	◦	Vector Type: Dropdown ("Single-Step Vector (ΔX', ΔY')", "Full Trajectory (H steps)").
+	•	Target (if Class):
+	◦	Buy Threshold (%): Float Input (e.g., +1.0).
+	◦	Sell Threshold (%): Float Input (e.g., -1.0).
+	•	Auxiliary Prediction Targets:
+	◦	Predict Rally Time: Toggle (True/False).
+
+
+5. Dynamic Error Correction & Healing Parameters
+
+This is the most advanced module, governing the "living" error-feedback loop.
+	•	Enable Dynamic Correction: Toggle (True/False). If True, activates the full error detection and healing system.
+	•	Error Computation Weights:
+	◦	gamma_1 (Vector Deviation Weight): Slider [0.0 - 1.0].
+	◦	gamma_2 (Frame Shift Weight): Slider [0.0 - 1.0].
+	◦	alpha_1 (Vector Distance Weight): Slider [0.0 - 1.0].
+	◦	alpha_2 (Vector Angle Weight): Slider [0.0 - 1.0].
+	◦	beta_1 (PCA1 Angle Weight): Slider [0.0 - 1.0].
+	◦	beta_2 (PCA2 Angle Weight): Slider [0.0 - 1.0].
+	•	Wound Detection:
+	◦	Error Buffer Size: Integer Input (e.g., 20).
+	◦	Wound Threshold Multiplier (k): Float Input (e.g., 2.5). Triggers correction if MeanError > k * StdError.
+	•	Correction Mechanism:
+	◦	Correction Step: Float Input (e.g., 0.1). How much to increase correction_factor when wounded.
+	◦	Max Correction Factor: Float Input (e.g., 1.0).
+	•	Performance-Based Healing:
+	◦	Correctness Buffer Size: Integer Input (e.g., 20).
+	◦	Prediction Accuracy Method: Dropdown ("Vector Cosine Similarity", "Directional Accuracy"). How we define a "correct" prediction.
+	◦	Healing Threshold: Float Slider (e.g., 0.75). Starts healing if MeanCorrectness > 75%.
+	◦	Healing Rate Function: Dropdown ("Proportional", "Linear Step"). Determines how fast correction_factordecays based on MeanCorrectness.
+
+
+
+6. Run & Output Parameters
+
+	•	Experiment Name: Text Input.
+	•	Save Model: Toggle (True/False).
+	•	Output Metrics: Checkboxes (Loss Curve, Accuracy Curve, Sharpe Ratio, Frame Drift Log).
+This form provides a comprehensive dashboard to systematically test every single hypothesis we have developed.
+
+
+
+
+

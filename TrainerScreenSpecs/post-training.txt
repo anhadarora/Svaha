@@ -1,0 +1,55 @@
+"After Training" (Final Evaluation Dashboard)
+
+This is the static report generated after a training run is complete. It is the final judgment on the experiment's viability.
+
+1. Experiment Summary
+
+	•	Experiment Name: [Text]
+	•	Final Status: [Text] (e.g., "COMPLETED", "STOPPED BY USER", "ERROR")
+	•	Total Training Time: [Text] (e.g., "04:38:52")
+	•	Best Model Checkpoint: [Link] (e.g., /models/Run_10m_HeikenAshi_ViT_Heal_v2/best_model.pth)
+
+2. Parameter Configuration (Recap)
+
+	•	Static Display: A read-only view of all the parameters selected in the "Before Training" form. This is essential for reproducibility, so you know exactly what settings produced this result.
+
+3. Final Performance Plots (Full History)
+
+	•	Plot 1: Loss vs. Epoch (Train & Validation): The complete, high-resolution history of training and validation loss, making it easy to see the exact point of overfitting.
+	•	Plot 2: Prediction Correctness vs. Epoch (Train & Validation): The complete history of our primary "healing" metric.
+
+4. Backtesting & Financial Viability Report (Test Set)
+
+This is the ultimate test. These metrics are calculated by running the best saved model over the test set (data it has never seen) and simulating trades.
+	•	Plot 3: Equity Curve: A line chart showing the cumulative P/L (Portfolio Value) over the test period vs. a "Buy and Hold" benchmark of the underlying (e.g., NIFTY 50).
+	•	Key Performance Indicators (KPIs):
+	◦	Total Return (%)
+	◦	Sharpe Ratio
+	◦	Sortino Ratio (focuses on downside volatility)
+	◦	Calmar Ratio (Total Return vs. Max Drawdown)
+	◦	Maximum Drawdown (%): The largest peak-to-trough drop in portfolio value.
+	•	Trade Statistics:
+	◦	Total Trades: [Number]
+	◦	Win Rate (%): (Number of Winning Trades / Total Trades)
+	◦	Loss Rate (%): (Number of Losing Trades / Total Trades)
+	◦	Profit Factor: (Gross Profit / Gross Loss)
+	◦	Average Win ($/Pts)
+	◦	Average Loss ($/Pts)
+
+5. Deep Dive: Dynamic System Analysis (Full History)
+
+This section provides a post-mortem on our unique architecture's behavior over the entire training run.
+	•	Plot 4: Correction Factor History: A full time-series plot of the Correction Factor. This shows when and how oftenthe system felt it was "wounded" and applied corrections.
+	•	Plot 5: Error Component Histogram: A histogram showing the distribution of the four error components (d_vec, theta_vec, theta_PCA1, theta_PCA2). This tells us what type of error was most common.
+	•	Plot 6: Frame Shift Stability Histogram: A histogram of the Frame Shift Error values. A sharply peaked-at-zero distribution is good (stable frame). A wide distribution is bad (chaotic frame).
+
+6. Sample Prediction Analysis (Test Set)
+
+	•	Visual Grid: Show a grid of 10-20 sample predictions from the test set.
+	•	Each Sample Includes:
+	1	Input (Dynamic Plane): The snapshot fed to the model.
+	2	Model's Prediction: The predicted vector/image.
+	3	Realized Outcome: The actual vector/image that occurred.
+	4	Error Breakdown: (e.g., d_vec=0.1, theta_vec=5°, frame_shift=2°).
+	5	Trade Result: (e.g., "Correct (Profit)", "Incorrect (Loss)").
+	•	Purpose: To build qualitative intuition. You can look at why the model failed. Did it fail during high frame shifts? Did it misjudge direction or just magnitude?

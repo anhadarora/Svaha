@@ -1,19 +1,30 @@
-import sys
 import os
+import sys
 import threading
-import pandas as pd
 from datetime import datetime
-from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QCheckBox, QProgressBar, QListWidget, QDateEdit, QComboBox,
-    QFileDialog, QGroupBox
-)
-from PySide6.QtCore import QDate, Signal, QObject
 
-# Assuming these are in the parent directory
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from ui.logger import UILogger
-from ui.downloader.download_worker import DownloadWorker
+import pandas as pd
+from PySide6.QtCore import QDate, QObject, Signal
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDateEdit,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QProgressBar,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+    QAbstractItemView,
+)
+
+from lib.downloader.download_worker import DownloadWorker
+from lib.logger import UILogger
 
 
 class Communicate(QObject):
@@ -86,7 +97,29 @@ class DownloaderScreen(QWidget):
         filter_layout.addWidget(self.index_filter)
 
         self.available_symbols_list = QListWidget()
+        self.available_symbols_list.setSelectionMode(
+            QAbstractItemView.ExtendedSelection
+        )
         browser_layout.addWidget(self.available_symbols_list)
+
+        selection_buttons_layout = QHBoxLayout()
+        browser_layout.addLayout(selection_buttons_layout)
+
+        self.select_all_button = QPushButton("Select All")
+        selection_buttons_layout.addWidget(self.select_all_button)
+
+        self.deselect_all_button = QPushButton("Deselect All")
+        selection_buttons_layout.addWidget(self.deselect_all_button)
+
+        # Middle Pane: Action Buttons
+        action_buttons_layout = QVBoxLayout()
+        symbol_layout.addLayout(action_buttons_layout)
+
+        self.add_selected_button = QPushButton(">>")
+        action_buttons_layout.addWidget(self.add_selected_button)
+
+        self.remove_selected_button = QPushButton("<<")
+        action_buttons_layout.addWidget(self.remove_selected_button)
 
         # Right Pane: Queue
         queue_layout = QVBoxLayout()
@@ -96,8 +129,10 @@ class DownloaderScreen(QWidget):
         queue_layout.addWidget(self.selected_count_label)
 
         self.selected_symbols_list = QListWidget()
+        self.selected_symbols_list.setSelectionMode(
+            QAbstractItemView.ExtendedSelection
+        )
         queue_layout.addWidget(self.selected_symbols_list)
-
 
         # --- Section 2: Time & Interval ---
         time_interval_group = QGroupBox("Time & Interval")
@@ -114,7 +149,18 @@ class DownloaderScreen(QWidget):
         time_layout.addWidget(self.end_date_edit)
 
         self.interval_combo = QComboBox()
-        self.interval_combo.addItems(["minute", "3minute", "5minute", "10minute", "15minute", "30minute", "60minute", "day"])
+        self.interval_combo.addItems(
+            [
+                "minute",
+                "3minute",
+                "5minute",
+                "10minute",
+                "15minute",
+                "30minute",
+                "60minute",
+                "day",
+            ]
+        )
         time_layout.addWidget(self.interval_combo)
 
         # --- Section 3: Storage & Sharding ---
@@ -136,9 +182,10 @@ class DownloaderScreen(QWidget):
         storage_layout.addWidget(self.save_parquet_check)
 
         self.sharding_combo = QComboBox()
-        self.sharding_combo.addItems(["None", "By Month", "By Year"])
+        self.sharding_combo.addItems(
+            ["None", "By Day", "By Week", "By Month", "By Quarter", "By Year"]
+        )
         storage_layout.addWidget(self.sharding_combo)
-
 
         # --- Section 4: Execution & Logs ---
         execution_logs_group = QGroupBox("Execution & Logs")
@@ -178,12 +225,24 @@ class DownloaderScreen(QWidget):
         self.index_filter.currentIndexChanged.connect(self.filter_symbols)
 
         # Connect symbol list signals
-        self.available_symbols_list.itemDoubleClicked.connect(self.add_symbol_to_queue)
-        self.selected_symbols_list.itemDoubleClicked.connect(self.remove_symbol_from_queue)
+        self.available_symbols_list.itemDoubleClicked.connect(
+            self.add_single_symbol_to_queue
+        )
+        self.selected_symbols_list.itemDoubleClicked.connect(
+            self.remove_single_symbol_from_queue
+        )
+
+        # Connect button signals
+        self.select_all_button.clicked.connect(self.select_all)
+        self.deselect_all_button.clicked.connect(self.deselect_all)
+        self.add_selected_button.clicked.connect(self.add_selected_to_queue)
+        self.remove_selected_button.clicked.connect(
+            self.remove_selected_from_queue)
 
         # Connect file dialog signals
         self.output_dir_button.clicked.connect(self.trigger_output_dir_chooser)
-        self.manifest_file_button.clicked.connect(self.trigger_manifest_file_chooser)
+        self.manifest_file_button.clicked.connect(
+            self.trigger_manifest_file_chooser)
 
         # Connect resume mode
         self.resume_check.stateChanged.connect(self.toggle_resume_mode)
@@ -209,8 +268,12 @@ class DownloaderScreen(QWidget):
         """Loads the master instrument catalog in a background thread."""
         try:
             # Correctly locate the assets folder relative to the project root
-            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-            master_file_path = os.path.join(project_root, 'assets', 'master_catalog_enriched.csv')
+            project_root = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "..")
+            )
+            master_file_path = os.path.join(
+                project_root, "source_data", "master_catalog_enriched.csv"
+            )
             self.master_df = pd.read_csv(master_file_path)
             self.comm.data_loaded_signal.emit()
         except Exception as e:
@@ -225,18 +288,25 @@ class DownloaderScreen(QWidget):
         self.index_filter.setDisabled(False)
 
         # Populate sector filter
-        unique_sectors = ["All Sectors"] + \
-            sorted(self.master_df['Industry'].dropna().unique().tolist())
+        unique_sectors = ["All Sectors"] + sorted(
+            self.master_df["Industry"].dropna().unique().tolist()
+        )
         self.sector_filter.addItems(unique_sectors)
 
         # Populate index filter
-        all_indices = self.master_df['Indices'].dropna().apply(
-            lambda x: [idx.strip() for idx in x.split(',')]).explode().unique().tolist()
+        all_indices = (
+            self.master_df["Indices"]
+            .dropna()
+            .apply(lambda x: [idx.strip() for idx in x.split(",")])
+            .explode()
+            .unique()
+            .tolist()
+        )
         unique_indices = ["All Indices"] + sorted(all_indices)
         self.index_filter.addItems(unique_indices)
 
         # Populate initial available symbols
-        self.available_symbols = self.master_df['Symbol'].tolist()
+        self.available_symbols = self.master_df["Symbol"].tolist()
         self.filter_symbols()
         self.add_log_entry("UI elements updated with master data.")
 
@@ -251,34 +321,62 @@ class DownloaderScreen(QWidget):
         index = self.index_filter.currentText()
 
         if search_term:
-            df = df[df['Symbol'].str.contains(search_term, na=False)]
+            df = df[df["Symbol"].str.contains(search_term, na=False)]
         if sector and sector != "All Sectors":
-            df = df[df['Industry'] == sector]
+            df = df[df["Industry"] == sector]
         if index and index != "All Indices":
-            df = df[df['Indices'].str.contains(index, na=False)]
+            df = df[df["Indices"].str.contains(index, na=False)]
 
-        self.available_symbols = df['Symbol'].tolist()
+        self.available_symbols = df["Symbol"].tolist()
         self.available_symbols_list.clear()
         self.available_symbols_list.addItems(self.available_symbols)
 
-    def add_symbol_to_queue(self, item):
-        """Adds a symbol to the selection queue if not already present."""
-        symbol = item.text()
-        if symbol not in self.selected_symbols:
-            self.selected_symbols.append(symbol)
-            self.selected_symbols.sort()
-            self.selected_symbols_list.clear()
-            self.selected_symbols_list.addItems(self.selected_symbols)
-            self.update_selected_count()
+    def add_single_symbol_to_queue(self, item):
+        """Adds a single symbol to the selection queue."""
+        self.add_to_queue([item.text()])
 
-    def remove_symbol_from_queue(self, item):
-        """Removes a symbol from the selection queue."""
-        symbol = item.text()
-        if symbol in self.selected_symbols:
-            self.selected_symbols.remove(symbol)
-            self.selected_symbols_list.clear()
-            self.selected_symbols_list.addItems(self.selected_symbols)
-            self.update_selected_count()
+    def remove_single_symbol_from_queue(self, item):
+        """Removes a single symbol from the selection queue."""
+        self.remove_from_queue([item.text()])
+
+    def select_all(self):
+        """Selects all items in the available symbols list."""
+        self.available_symbols_list.selectAll()
+
+    def deselect_all(self):
+        """Deselects all items in the available symbols list."""
+        self.available_symbols_list.clearSelection()
+
+    def add_selected_to_queue(self):
+        """Adds selected symbols to the queue."""
+        selected_items = self.available_symbols_list.selectedItems()
+        symbols_to_add = [item.text() for item in selected_items]
+        self.add_to_queue(symbols_to_add)
+
+    def remove_selected_from_queue(self):
+        """Removes selected symbols from the queue."""
+        selected_items = self.selected_symbols_list.selectedItems()
+        symbols_to_remove = [item.text() for item in selected_items]
+        self.remove_from_queue(symbols_to_remove)
+
+    def add_to_queue(self, symbols):
+        """Adds a list of symbols to the selection queue."""
+        for symbol in symbols:
+            if symbol not in self.selected_symbols:
+                self.selected_symbols.append(symbol)
+        self.selected_symbols.sort()
+        self.selected_symbols_list.clear()
+        self.selected_symbols_list.addItems(self.selected_symbols)
+        self.update_selected_count()
+
+    def remove_from_queue(self, symbols):
+        """Removes a list of symbols from the selection queue."""
+        for symbol in symbols:
+            if symbol in self.selected_symbols:
+                self.selected_symbols.remove(symbol)
+        self.selected_symbols_list.clear()
+        self.selected_symbols_list.addItems(self.selected_symbols)
+        self.update_selected_count()
 
     def update_selected_count(self):
         self.selected_count_text = f"Selected: {len(self.selected_symbols)}"
@@ -288,29 +386,29 @@ class DownloaderScreen(QWidget):
         """Validates UI parameters and starts the DownloadWorker thread."""
         params = {}
         try:
-            params['resume_mode'] = self.is_resume_mode
+            params["resume_mode"] = self.is_resume_mode
             if self.is_resume_mode:
-                params['manifest_path'] = self.manifest_file_edit.text()
-                if not os.path.exists(params['manifest_path']):
+                params["manifest_path"] = self.manifest_file_edit.text()
+                if not os.path.exists(params["manifest_path"]):
                     raise ValueError("Manifest file not found.")
             else:
-                params['symbols'] = self.selected_symbols[:]
-                if not params['symbols']:
+                params["symbols"] = self.selected_symbols[:]
+                if not params["symbols"]:
                     raise ValueError("No symbols selected in the queue.")
 
-            params['start_date'] = self.start_date_edit.date().toPython()
-            params['end_date'] = self.end_date_edit.date().toPython()
-            params['interval'] = self.interval_combo.currentText()
+            params["start_date"] = self.start_date_edit.date().toPython()
+            params["end_date"] = self.end_date_edit.date().toPython()
+            params["interval"] = self.interval_combo.currentText()
 
-            params['output_dir'] = self.output_dir_edit.text()
-            if not os.path.isdir(params['output_dir']):
+            params["output_dir"] = self.output_dir_edit.text()
+            if not os.path.isdir(params["output_dir"]):
                 raise ValueError("Output directory is not valid.")
 
-            params['save_csv'] = self.save_csv_check.isChecked()
-            params['save_parquet'] = self.save_parquet_check.isChecked()
-            params['sharding'] = self.sharding_combo.currentText()
+            params["save_csv"] = self.save_csv_check.isChecked()
+            params["save_parquet"] = self.save_parquet_check.isChecked()
+            params["sharding"] = self.sharding_combo.currentText()
 
-            if not params['save_csv'] and not params['save_parquet']:
+            if not params["save_csv"] and not params["save_parquet"]:
                 raise ValueError(
                     "Select at least one save format (CSV or Parquet).")
 
@@ -333,13 +431,16 @@ class DownloaderScreen(QWidget):
 
     def trigger_output_dir_chooser(self):
         """Opens a dialog to select an output directory."""
-        directory = QFileDialog.getExistingDirectory(self, "Select Output Directory")
+        directory = QFileDialog.getExistingDirectory(
+            self, "Select Output Directory")
         if directory:
             self.output_dir_edit.setText(directory)
 
     def trigger_manifest_file_chooser(self):
         """Opens a dialog to select a manifest file."""
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select Manifest File", "", "JSON Files (*.json)")
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Select Manifest File", "", "JSON Files (*.json)"
+        )
         if file_path:
             self.manifest_file_edit.setText(file_path)
 

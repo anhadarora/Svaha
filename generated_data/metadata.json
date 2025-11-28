@@ -1,0 +1,57 @@
+[
+    {
+        "file_id": "1c54458c-64a9-4f0a-af9f-ea81170c8208",
+        "base_filename": "ACMESOLAR_2025-11-11_2025-11-20_minute",
+        "symbol": "ACMESOLAR",
+        "start_date": "2025-11-11",
+        "end_date": "2025-11-20",
+        "interval": "minute",
+        "sharding": "None",
+        "csv_filename": "1c54458c-64a9-4f0a-af9f-ea81170c8208.csv",
+        "parquet_filename": "1c54458c-64a9-4f0a-af9f-ea81170c8208.parquet"
+    },
+    {
+        "file_id": "fa3606ce-7f66-4c81-8edb-520f639a7fea",
+        "base_filename": "AIAENG_2025-11-11_2025-11-20_minute",
+        "symbol": "AIAENG",
+        "start_date": "2025-11-11",
+        "end_date": "2025-11-20",
+        "interval": "minute",
+        "sharding": "None",
+        "csv_filename": "fa3606ce-7f66-4c81-8edb-520f639a7fea.csv",
+        "parquet_filename": "fa3606ce-7f66-4c81-8edb-520f639a7fea.parquet"
+    },
+    {
+        "file_id": "729ae5d5-b11b-4cda-bcaf-0bec600e1b2b",
+        "base_filename": "APLAPOLLO_2025-11-11_2025-11-20_minute",
+        "symbol": "APLAPOLLO",
+        "start_date": "2025-11-11",
+        "end_date": "2025-11-20",
+        "interval": "minute",
+        "sharding": "None",
+        "csv_filename": "729ae5d5-b11b-4cda-bcaf-0bec600e1b2b.csv",
+        "parquet_filename": "729ae5d5-b11b-4cda-bcaf-0bec600e1b2b.parquet"
+    },
+    {
+        "file_id": "0f644ddb-f957-49e3-b0ed-1b8b5162586c",
+        "base_filename": "AUBANK_2025-11-11_2025-11-20_minute",
+        "symbol": "AUBANK",
+        "start_date": "2025-11-11",
+        "end_date": "2025-11-20",
+        "interval": "minute",
+        "sharding": "None",
+        "csv_filename": "0f644ddb-f957-49e3-b0ed-1b8b5162586c.csv",
+        "parquet_filename": "0f644ddb-f957-49e3-b0ed-1b8b5162586c.parquet"
+    },
+    {
+        "file_id": "9844f587-9529-452b-9a72-143492e2ff04",
+        "base_filename": "AWL_2025-11-11_2025-11-20_minute",
+        "symbol": "AWL",
+        "start_date": "2025-11-11",
+        "end_date": "2025-11-20",
+        "interval": "minute",
+        "sharding": "None",
+        "csv_filename": "9844f587-9529-452b-9a72-143492e2ff04.csv",
+        "parquet_filename": "9844f587-9529-452b-9a72-143492e2ff04.parquet"
+    }
+]
