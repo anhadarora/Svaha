@@ -1,9 +1,13 @@
+cryptography
 kiteconnect
-pandas
+matplotlib
 numpy
+pandas
+pyqtgraph
+pyside6
+pyside6_addons
+pyside6_essentials
+Requests
 scikit-learn
 tensorflow
-requests
 watchdog
-cryptography
-PySide6
