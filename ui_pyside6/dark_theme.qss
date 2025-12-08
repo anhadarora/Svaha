@@ -28,7 +28,7 @@ QLabel {
     color: #f0f0f0;
 }
 
-QLineEdit, QComboBox, QDateEdit {
+QLineEdit, QComboBox, QDateEdit, QSpinBox {
     border: 1px solid #555;
     border-radius: 4px;
     padding: 5px;
@@ -36,7 +36,7 @@ QLineEdit, QComboBox, QDateEdit {
     color: #f0f0f0;
 }
 
-QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QSpinBox:focus {
     border-color: #0d6efd;
 }
 
