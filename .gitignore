@@ -17,3 +17,4 @@ screenshots/
 
 # Ignore logs
 logs/
+\nbuild/

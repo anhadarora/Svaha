@@ -26,6 +26,14 @@ class TrainerScreen(QWidget):
         self.tab_widget.addTab(self.results_tab, "Results")
         self.tab_widget.addTab(self.history_tab, "History")
 
+        # Connect the signal from the setup tab to switch to the monitor tab
+        self.setup_tab.start_training_requested.connect(self._on_start_training_requested)
+
+    def _on_start_training_requested(self):
+        """Switches to the monitor tab and starts the training process."""
+        self.tab_widget.setCurrentWidget(self.monitor_tab)
+        self.monitor_tab.begin_training()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

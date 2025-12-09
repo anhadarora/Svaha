@@ -8,10 +8,12 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QLineEdit,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 
 class PredictionTargetWidget(QWidget):
+    configuration_changed = Signal()
+
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
@@ -49,3 +51,21 @@ class PredictionTargetWidget(QWidget):
 
         self.predict_rally_time = QCheckBox()
         form_layout.addRow("Predict Rally Time:", self.predict_rally_time)
+
+    def connect_signals(self):
+        self.prediction_target_type.currentIndexChanged.connect(self.configuration_changed)
+        self.prediction_horizon.valueChanged.connect(self.configuration_changed)
+        self.vector_type.currentIndexChanged.connect(self.configuration_changed)
+        self.buy_threshold.textChanged.connect(self.configuration_changed)
+        self.sell_threshold.textChanged.connect(self.configuration_changed)
+        self.predict_rally_time.toggled.connect(self.configuration_changed)
+
+    def get_parameters(self):
+        return {
+            "prediction_target_type": self.prediction_target_type.currentText(),
+            "prediction_horizon": self.prediction_horizon.value(),
+            "vector_type": self.vector_type.currentText(),
+            "buy_threshold": self.buy_threshold.text(),
+            "sell_threshold": self.sell_threshold.text(),
+            "predict_rally_time": self.predict_rally_time.isChecked(),
+        }

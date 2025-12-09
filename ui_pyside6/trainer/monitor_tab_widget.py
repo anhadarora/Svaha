@@ -4,7 +4,12 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QScrollArea,
     QVBoxLayout,
+    QPushButton,
+    QMessageBox,
 )
+import json
+import os
+
 from ..training.run_status_widget import RunStatusWidget
 from ..training.progress_indicators_widget import ProgressIndicatorsWidget
 from ..training.snapshot_visualization_widget import SnapshotVisualizationWidget
@@ -36,6 +41,10 @@ class MonitorTabWidget(QWidget):
 
         # Top Bar
         top_bar = QHBoxLayout()
+        self.begin_button = QPushButton("Begin Experiment")
+        self.begin_button.clicked.connect(self._on_begin_clicked)
+        top_bar.addWidget(self.begin_button)
+        top_bar.addStretch()
         top_bar.addWidget(RunStatusWidget())
         top_bar.addWidget(ProgressIndicatorsWidget())
         main_grid.addLayout(top_bar, 0, 0, 1, 3)  # Span 3 columns
@@ -48,5 +57,29 @@ class MonitorTabWidget(QWidget):
         main_grid.addWidget(CorrectionHealingPlotWidget(), 2, 1)
         main_grid.addWidget(ErrorComponentPlotWidget(), 2, 2)
 
-        # Snapshot visualization can be added here if desired
-        # main_grid.addWidget(SnapshotVisualizationWidget(), 3, 0, 1, 3)
+    def begin_training(self):
+        """Public method to programmatically start the training."""
+        self.begin_button.click()
+
+    def _on_begin_clicked(self):
+        """Loads the last applied config and starts the training process."""
+        config_path = os.path.abspath("./build/last_applied_config.json")
+        
+        if not os.path.exists(config_path):
+            QMessageBox.critical(self, "Error", "No configuration applied. Please go to the Setup tab and click 'Apply' first.")
+            return
+
+        try:
+            with open(config_path, "r") as f:
+                config = json.load(f)
+            
+            print("--- Starting Experiment ---")
+            print(f"Experiment Name: {config.get('experiment_name', 'N/A')}")
+            # In a real scenario, you would pass this config to a training worker thread.
+            print("Configuration loaded. Training process would start now.")
+            
+            self.begin_button.setEnabled(False)
+            self.begin_button.setText("Experiment Running...")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load or parse configuration file:\n{e}")

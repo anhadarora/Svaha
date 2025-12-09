@@ -8,10 +8,12 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QLineEdit,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 
 class ErrorCorrectionWidget(QWidget):
+    configuration_changed = Signal()
+
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
@@ -75,3 +77,39 @@ class ErrorCorrectionWidget(QWidget):
         self.healing_rate_function = QComboBox()
         self.healing_rate_function.addItems(["Proportional", "Linear Step"])
         form_layout.addRow("Healing Rate Function:", self.healing_rate_function)
+
+    def connect_signals(self):
+        self.enable_dynamic_correction.toggled.connect(self.configuration_changed)
+        self.gamma_1.valueChanged.connect(self.configuration_changed)
+        self.gamma_2.valueChanged.connect(self.configuration_changed)
+        self.alpha_1.valueChanged.connect(self.configuration_changed)
+        self.alpha_2.valueChanged.connect(self.configuration_changed)
+        self.beta_1.valueChanged.connect(self.configuration_changed)
+        self.beta_2.valueChanged.connect(self.configuration_changed)
+        self.error_buffer_size.textChanged.connect(self.configuration_changed)
+        self.wound_threshold_multiplier.textChanged.connect(self.configuration_changed)
+        self.correction_step.textChanged.connect(self.configuration_changed)
+        self.max_correction_factor.textChanged.connect(self.configuration_changed)
+        self.correctness_buffer_size.textChanged.connect(self.configuration_changed)
+        self.prediction_accuracy_method.currentIndexChanged.connect(self.configuration_changed)
+        self.healing_threshold.valueChanged.connect(self.configuration_changed)
+        self.healing_rate_function.currentIndexChanged.connect(self.configuration_changed)
+
+    def get_parameters(self):
+        return {
+            "enable_dynamic_correction": self.enable_dynamic_correction.isChecked(),
+            "gamma_1": self.gamma_1.value() / 100.0,
+            "gamma_2": self.gamma_2.value() / 100.0,
+            "alpha_1": self.alpha_1.value() / 100.0,
+            "alpha_2": self.alpha_2.value() / 100.0,
+            "beta_1": self.beta_1.value() / 100.0,
+            "beta_2": self.beta_2.value() / 100.0,
+            "error_buffer_size": self.error_buffer_size.text(),
+            "wound_threshold_multiplier": self.wound_threshold_multiplier.text(),
+            "correction_step": self.correction_step.text(),
+            "max_correction_factor": self.max_correction_factor.text(),
+            "correctness_buffer_size": self.correctness_buffer_size.text(),
+            "prediction_accuracy_method": self.prediction_accuracy_method.currentText(),
+            "healing_threshold": self.healing_threshold.value() / 100.0,
+            "healing_rate_function": self.healing_rate_function.currentText(),
+        }

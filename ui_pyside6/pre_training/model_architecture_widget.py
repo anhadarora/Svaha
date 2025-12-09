@@ -8,10 +8,12 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QLineEdit,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 
 class ModelArchitectureWidget(QWidget):
+    configuration_changed = Signal()
+
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
@@ -60,3 +62,31 @@ class ModelArchitectureWidget(QWidget):
         self.optimizer = QComboBox()
         self.optimizer.addItems(["Adam", "SGD", "RMSprop"])
         form_layout.addRow("Optimizer:", self.optimizer)
+
+    def connect_signals(self):
+        self.input_format.currentIndexChanged.connect(self.configuration_changed)
+        self.model_type.currentIndexChanged.connect(self.configuration_changed)
+        self.enable_sequential_input.toggled.connect(self.configuration_changed)
+        self.sequence_length.valueChanged.connect(self.configuration_changed)
+        self.sequence_handling_method.currentIndexChanged.connect(self.configuration_changed)
+        self.enable_delta_features.toggled.connect(self.configuration_changed)
+        self.delta_method.currentIndexChanged.connect(self.configuration_changed)
+        self.learning_rate.textChanged.connect(self.configuration_changed)
+        self.batch_size.textChanged.connect(self.configuration_changed)
+        self.epochs.textChanged.connect(self.configuration_changed)
+        self.optimizer.currentIndexChanged.connect(self.configuration_changed)
+
+    def get_parameters(self):
+        return {
+            "input_format": self.input_format.currentText(),
+            "model_type": self.model_type.currentText(),
+            "enable_sequential_input": self.enable_sequential_input.isChecked(),
+            "sequence_length": self.sequence_length.value(),
+            "sequence_handling_method": self.sequence_handling_method.currentText(),
+            "enable_delta_features": self.enable_delta_features.isChecked(),
+            "delta_method": self.delta_method.currentText(),
+            "learning_rate": self.learning_rate.text(),
+            "batch_size": self.batch_size.text(),
+            "epochs": self.epochs.text(),
+            "optimizer": self.optimizer.currentText(),
+        }
