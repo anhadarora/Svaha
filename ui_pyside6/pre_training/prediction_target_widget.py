@@ -2,70 +2,147 @@ from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QGroupBox,
-    QFormLayout,
+    QGridLayout,
     QComboBox,
-    QSlider,
-    QCheckBox,
-    QLineEdit,
+    QDoubleSpinBox,
+    QSpinBox,
+    QLabel,
 )
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 
 
 class PredictionTargetWidget(QWidget):
+    """A widget to configure how the ground-truth labels are calculated."""
+
     configuration_changed = Signal()
 
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(15)
 
-        group = QGroupBox("Prediction Target (Label) Parameters")
-        self.layout.addWidget(group)
+        # --- 1. Regression Logic ---
+        regression_group = QGroupBox("Regression Logic")
+        self.layout.addWidget(regression_group)
+        regression_layout = QGridLayout(regression_group)
 
-        form_layout = QFormLayout(group)
+        self.return_calculation = QComboBox()
+        self.return_calculation.addItems([
+            "Thesis (Next Open to Future Close)",
+            "Standard (Close to Close)",
+            "Intraday (Open to Close)",
+        ])
+        self._add_grid_row(regression_layout, 0, "Return Calculation:", self.return_calculation)
 
-        self.prediction_target_type = QComboBox()
-        self.prediction_target_type.addItems(
-            [
-                "Vectorial Movement (in Dynamic Plane)",
-                "Image-to-Image (Next Dynamic Plane)",
-                "Scalar Return (Regression)",
-                "Signal Class (Buy/Sell/Hold)",
-            ]
-        )
-        form_layout.addRow("Prediction Target Type:", self.prediction_target_type)
+        self.label_scaling = QComboBox()
+        self.label_scaling.addItems(["Percent", "Decimal", "Log Return", "Basis Points"])
+        self.label_scaling.setCurrentText("Percent")
+        self._add_grid_row(regression_layout, 1, "Label Scaling:", self.label_scaling)
 
-        self.prediction_horizon = QSlider(Qt.Horizontal)
-        self.prediction_horizon.setRange(1, 10)
-        form_layout.addRow("Prediction Horizon (H):", self.prediction_horizon)
+        # --- 2. Classification Settings (Conditional) ---
+        self.classification_group = QGroupBox("Classification Settings")
+        self.layout.addWidget(self.classification_group)
+        classification_layout = QGridLayout(self.classification_group)
 
-        self.vector_type = QComboBox()
-        self.vector_type.addItems(["Single-Step Vector (ΔX', ΔY')", "Full Trajectory (H steps)"])
-        form_layout.addRow("Vector Type (if Vectorial):", self.vector_type)
+        self.class_logic = QComboBox()
+        self.class_logic.addItems(["Ternary (Buy/Sell/Hold)", "Binary (Up/Down)"])
+        self._add_grid_row(classification_layout, 0, "Class Logic:", self.class_logic)
 
-        self.buy_threshold = QLineEdit("+1.0")
-        form_layout.addRow("Buy Threshold (%) (if Class):", self.buy_threshold)
+        self.buy_threshold = QDoubleSpinBox()
+        self.buy_threshold.setSuffix(" %")
+        self.buy_threshold.setRange(0.01, 100.0)
+        self.buy_threshold.setValue(1.0)
+        self._add_grid_row(classification_layout, 1, "Buy Threshold:", self.buy_threshold)
 
-        self.sell_threshold = QLineEdit("-1.0")
-        form_layout.addRow("Sell Threshold (%) (if Class):", self.sell_threshold)
+        self.sell_threshold = QDoubleSpinBox()
+        self.sell_threshold.setSuffix(" %")
+        self.sell_threshold.setRange(-100.0, -0.01)
+        self.sell_threshold.setValue(-1.0)
+        self._add_grid_row(classification_layout, 2, "Sell Threshold:", self.sell_threshold)
 
-        self.predict_rally_time = QCheckBox()
-        form_layout.addRow("Predict Rally Time:", self.predict_rally_time)
+        # --- 3. Rally Time Settings (Conditional) ---
+        self.rally_time_group = QGroupBox("Rally Time Settings")
+        self.layout.addWidget(self.rally_time_group)
+        rally_layout = QGridLayout(self.rally_time_group)
+
+        self.target_magnitude = QDoubleSpinBox()
+        self.target_magnitude.setSuffix(" %")
+        self.target_magnitude.setRange(0.1, 1000.0)
+        self.target_magnitude.setValue(2.0)
+        self._add_grid_row(rally_layout, 0, "Target Magnitude:", self.target_magnitude)
+
+        self.max_horizon = QSpinBox()
+        self.max_horizon.setSuffix(" candles")
+        self.max_horizon.setRange(1, 1000)
+        self.max_horizon.setValue(50)
+        self._add_grid_row(rally_layout, 1, "Max Horizon:", self.max_horizon)
+
+        # --- 4. Frame Reference (Conditional) ---
+        self.frame_reference_group = QGroupBox("Frame of Reference")
+        self.layout.addWidget(self.frame_reference_group)
+        frame_layout = QGridLayout(self.frame_reference_group)
+
+        self.target_frame = QComboBox()
+        self.target_frame.addItems(["Global (Absolute Return)", "Local (Dynamic Vector)"])
+        self._add_grid_row(frame_layout, 0, "Target Frame:", self.target_frame)
+
+        self.layout.addStretch()
+
+        # Set initial visibility
+        self.classification_group.setVisible(False)
+        self.rally_time_group.setVisible(False)
+        self.frame_reference_group.setVisible(False)
+
+    def _add_grid_row(self, layout, row, label_text, widget):
+        label = QLabel(label_text)
+        label.setBuddy(widget)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(widget, row, 1)
 
     def connect_signals(self):
-        self.prediction_target_type.currentIndexChanged.connect(self.configuration_changed)
-        self.prediction_horizon.valueChanged.connect(self.configuration_changed)
-        self.vector_type.currentIndexChanged.connect(self.configuration_changed)
-        self.buy_threshold.textChanged.connect(self.configuration_changed)
-        self.sell_threshold.textChanged.connect(self.configuration_changed)
-        self.predict_rally_time.toggled.connect(self.configuration_changed)
+        self.return_calculation.currentIndexChanged.connect(self.configuration_changed)
+        self.label_scaling.currentIndexChanged.connect(self.configuration_changed)
+        self.class_logic.currentIndexChanged.connect(self.configuration_changed)
+        self.buy_threshold.valueChanged.connect(self.configuration_changed)
+        self.sell_threshold.valueChanged.connect(self.configuration_changed)
+        self.target_magnitude.valueChanged.connect(self.configuration_changed)
+        self.max_horizon.valueChanged.connect(self.configuration_changed)
+        self.target_frame.currentIndexChanged.connect(self.configuration_changed)
 
     def get_parameters(self):
-        return {
-            "prediction_target_type": self.prediction_target_type.currentText(),
-            "prediction_horizon": self.prediction_horizon.value(),
-            "vector_type": self.vector_type.currentText(),
-            "buy_threshold": self.buy_threshold.text(),
-            "sell_threshold": self.sell_threshold.text(),
-            "predict_rally_time": self.predict_rally_time.isChecked(),
+        params = {
+            "regression_logic": {
+                "return_calculation": self.return_calculation.currentText(),
+                "label_scaling": self.label_scaling.currentText(),
+            }
         }
+        if self.classification_group.isVisible():
+            params["classification_settings"] = {
+                "class_logic": self.class_logic.currentText(),
+                "buy_threshold": self.buy_threshold.value(),
+                "sell_threshold": self.sell_threshold.value(),
+            }
+        if self.rally_time_group.isVisible():
+            params["rally_time_settings"] = {
+                "target_magnitude": self.target_magnitude.value(),
+                "max_horizon": self.max_horizon.value(),
+            }
+        if self.frame_reference_group.isVisible():
+            params["frame_reference"] = {
+                "target_frame": self.target_frame.currentText(),
+            }
+        return params
+
+    def update_visibility(self, heads_state: dict):
+        """Updates visibility of conditional sections based on head selections."""
+        is_classification_head = "Classification" in heads_state.get("primary", "")
+        is_directional_confidence_head = heads_state.get("directional_confidence", False)
+        self.classification_group.setVisible(is_classification_head or is_directional_confidence_head)
+
+        is_rally_time_head = heads_state.get("rally_time", False)
+        self.rally_time_group.setVisible(is_rally_time_head)
+
+    def set_frame_reference_visibility(self, visible: bool):
+        """Updates visibility of the frame reference section."""
+        self.frame_reference_group.setVisible(visible)

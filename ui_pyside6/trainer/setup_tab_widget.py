@@ -86,6 +86,12 @@ class SetupTabWidget(QWidget):
         control_button_layout = QHBoxLayout()
         self.apply_button = QPushButton("Apply")
         self.apply_and_run_button = QPushButton("Apply & Run")
+        self.apply_and_run_button.setStyleSheet("""
+            background-color: #0d6efd; 
+            color: white; 
+            font-weight: bold; 
+            padding: 10px;
+        """)
         control_button_layout.addStretch()
         control_button_layout.addWidget(self.apply_button)
         control_button_layout.addWidget(self.apply_and_run_button)
@@ -119,9 +125,15 @@ class SetupTabWidget(QWidget):
         self._connect_signals()
         self.on_data_source_selected(False)
         self.update_experiment_id()
-        self._on_chart_type_changed(
-            self.model_input_parameters_widget.chart_type_combo.currentText()
+        
+        # Emit initial states for connected widgets
+        self._on_chart_type_changed(self.model_input_parameters_widget.chart_type_combo.currentText())
+        self.model_input_parameters_widget._emit_resolution()
+        self.model_input_parameters_widget.window_size_changed.emit(
+            self.model_input_parameters_widget.input_window_size_n_spinbox.value()
         )
+        self.model_architecture_widget._emit_prediction_heads_changed()
+
         self.nav_list.setCurrentRow(0)
         self._update_nav_buttons(0)
         self._update_visited_status(0)
@@ -160,8 +172,18 @@ class SetupTabWidget(QWidget):
                     self._on_parameter_changed, Qt.QueuedConnection
                 )
 
+        # Inter-widget communication
+        self.model_input_parameters_widget.resolution_changed.connect(
+            self.model_architecture_widget.set_target_resolution
+        )
+        self.model_input_parameters_widget.window_size_changed.connect(
+            self.model_architecture_widget.set_sequence_modeling_visibility
+        )
         self.model_input_parameters_widget.chart_type_combo.currentTextChanged.connect(
             self._on_chart_type_changed
+        )
+        self.model_architecture_widget.prediction_heads_changed.connect(
+            self.prediction_target_widget.update_visibility
         )
 
         self.apply_button.clicked.connect(self._on_apply)
@@ -213,6 +235,7 @@ class SetupTabWidget(QWidget):
     def _on_chart_type_changed(self, chart_type_text):
         is_dynamic = chart_type_text == "Dynamic 2D Plane"
         self.run_output_widget.set_dynamic_plane_diagnostics_visibility(is_dynamic)
+        self.prediction_target_widget.set_frame_reference_visibility(is_dynamic)
 
     def get_configuration(self):
         config = {}
