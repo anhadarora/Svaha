@@ -151,3 +151,23 @@ To improve user experience and fix UI scaling issues, the Trainer Setup tab has 
 3.  **"Visited" Icons:** The sidebar uses `○` and `✔` icons to give users a visual cue of which steps they have already visited.
 4.  **Scrollability:** The main content area is now wrapped in a `QScrollArea`, which resolves the issue where the app would not fit on smaller screens like an iPad via Sidecar.
 5.  **Focused Steps:** Each configuration widget is now on its own page, reducing clutter and guiding the user through the setup one step at a time.
+
+---
+
+---
+
+### 08:55 PM | December 9, 2025 | Tuesday | Home
+
+## Overhauled Trainer Setup UI & Added Advanced Parameters
+
+Completed a major refactoring of the Trainer Setup UI to create a more intuitive, powerful, and aesthetically consistent experience.
+
+1.  **New Hyperparameter Sections:** Added comprehensive controls for "Training Hyperparameters", "Prediction Target" logic, and the "Error Correction Healing Phase" to allow for fine-grained experimental setup.
+2.  **UI/UX Refactoring:**
+    *   Replaced all custom `Accordion` and `QFormLayout` based UIs with a standardized system of `QGroupBox` and `QGridLayout`. This creates a cleaner, more compact, and consistent look across all setup screens.
+    *   Adjusted layouts to be vertical, eliminating horizontal scrolling and improving usability on smaller screens.
+3.  **Conditional Visibility:** Implemented robust signal/slot logic to dynamically show or hide entire configuration sections based on user selections, reducing clutter and guiding the user.
+4.  **Bug Fixes & Enhancements:**
+    *   Fixed a critical bug where conditional UI sections were not appearing correctly.
+    *   Added a "Line Color" option to the chart styling parameters.
+    *   Styled the primary "Apply & Run" button to be visually distinct.
