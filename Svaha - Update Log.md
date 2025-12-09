@@ -124,6 +124,14 @@
 4.  **Automated Experiment Naming:** The system now automatically generates a unique experiment ID (a hash of the settings) to ensure every run is traceable. The name can still be manually overridden.
 5.  **Integrated Workflow:** Implemented an "Apply & Run" button that saves the configuration, switches to the "Monitor" tab, and starts the training process, creating a seamless user experience.
 6.  **New Widgets:**
-    *   Added `FileSavingWidget` to define output paths for models and data.
-    *   Completely overhauled `ModelInputParametersWidget` with advanced options for different chart types (including a "Dynamic 2D Plane"), image styling, and technical overlays.
+    - Added `FileSavingWidget` to define output paths for models and data.
+    - Completely overhauled `ModelInputParametersWidget` with advanced options for different chart types (including a "Dynamic 2D Plane"), image styling, and technical overlays.
 7.  **Activated Monitor Tab:** The "Begin Experiment" button on the monitor tab is now functional and loads the saved configuration to kick off the training run.
+
+---
+
+---
+
+### 02:45 PM | December 9, 2025 | Tuesday | Home
+
+1. Added custom command "/sync" to auto-write the latest changes to the update log, and commit message, and sync with github remote's main branch.
