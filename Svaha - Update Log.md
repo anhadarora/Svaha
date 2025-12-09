@@ -135,3 +135,19 @@
 ### 02:45 PM | December 9, 2025 | Tuesday | Home
 
 1. Added custom command "/sync" to auto-write the latest changes to the update log, and commit message, and sync with github remote's main branch.
+
+---
+
+---
+
+### 03:38 PM | December 9, 2025 | Tuesday | Home
+
+## Refactored Trainer Setup UI to Stepped Wizard
+
+To improve user experience and fix UI scaling issues, the Trainer Setup tab has been completely redesigned.
+
+1.  **New Layout:** Replaced the unbalanced two-column layout with a guided, step-by-step wizard.
+2.  **Navigation Sidebar:** A sidebar on the left now shows all the setup steps, providing a clear overview of the process.
+3.  **"Visited" Icons:** The sidebar uses `○` and `✔` icons to give users a visual cue of which steps they have already visited.
+4.  **Scrollability:** The main content area is now wrapped in a `QScrollArea`, which resolves the issue where the app would not fit on smaller screens like an iPad via Sidecar.
+5.  **Focused Steps:** Each configuration widget is now on its own page, reducing clutter and guiding the user through the setup one step at a time.
