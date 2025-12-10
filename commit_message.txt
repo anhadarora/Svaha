@@ -1,0 +1,10 @@
+feat(ui): implement context-aware tooltip system
+
+Implements a comprehensive, hotkey-driven tooltip system to improve UI discoverability and provide inline documentation.
+
+- A central `TooltipManager` loads content from an external `tooltips.json` file, decoupling documentation from code.
+- An application-wide `EventFilter` detects `Ctrl/Alt + Hover` to display tooltips, avoiding constant popups.
+- Tooltips are rendered from Markdown to HTML for rich formatting.
+- The system intelligently repositions tooltips to prevent them from appearing off-screen.
+- All widgets in the Downloader and Trainer screens have been assigned descriptive, hierarchical `objectName`s to serve as keys for the tooltip content.
+- The `tooltips.json` file has been fully populated with descriptions for all named widgets.
