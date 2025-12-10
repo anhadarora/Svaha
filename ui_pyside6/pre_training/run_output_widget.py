@@ -20,6 +20,7 @@ class RunOutputWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("run_output")
         self.all_checkboxes = []
         self.is_manually_edited = False
         
@@ -37,35 +38,39 @@ class RunOutputWidget(QWidget):
         
         name_layout = QHBoxLayout()
         self.experiment_name = QLineEdit()
+        self.experiment_name.setObjectName("run_output.experiment_name")
         name_layout.addWidget(self.experiment_name)
         self.revert_button = QPushButton("Revert to ID")
+        self.revert_button.setObjectName("run_output.revert_button")
         self.revert_button.setVisible(False)
         name_layout.addWidget(self.revert_button)
         exp_name_layout.addLayout(name_layout)
         layout.addWidget(exp_name_group)
 
         metrics_group = QGroupBox("Output Metrics")
+        metrics_group.setObjectName("run_output.output_metrics")
         metrics_layout = QVBoxLayout(metrics_group)
         layout.addWidget(metrics_group)
 
-        self.loss_curve_check = self._add_checkbox(metrics_layout, "Loss Curve")
-        self.accuracy_curve_check = self._add_checkbox(metrics_layout, "Accuracy Curve")
+        self.loss_curve_check = self._add_checkbox(metrics_layout, "Loss Curve", "run_output.output_metrics.loss_curve")
+        self.accuracy_curve_check = self._add_checkbox(metrics_layout, "Accuracy Curve", "run_output.output_metrics.accuracy_curve")
         
         financial_group = QGroupBox("Financial Metrics")
         financial_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         financial_layout = QVBoxLayout(financial_group)
-        self.sharpe_ratio_check = self._add_checkbox(financial_layout, "Sharpe Ratio")
-        self.alpha_beta_check = self._add_checkbox(financial_layout, "Alpha & Beta")
-        self.cum_return_check = self._add_checkbox(financial_layout, "Cumulative Return vs. Benchmark")
-        self.max_drawdown_check = self._add_checkbox(financial_layout, "Max Drawdown")
+        self.sharpe_ratio_check = self._add_checkbox(financial_layout, "Sharpe Ratio", "run_output.output_metrics.sharpe_ratio")
+        self.alpha_beta_check = self._add_checkbox(financial_layout, "Alpha & Beta", "run_output.output_metrics.alpha_beta")
+        self.cum_return_check = self._add_checkbox(financial_layout, "Cumulative Return vs. Benchmark", "run_output.output_metrics.cumulative_return")
+        self.max_drawdown_check = self._add_checkbox(financial_layout, "Max Drawdown", "run_output.output_metrics.max_drawdown")
         metrics_layout.addWidget(financial_group)
 
         self.dyn_plane_group = QGroupBox("Dynamic Plane Diagnostics")
+        self.dyn_plane_group.setObjectName("run_output.dynamic_plane_diagnostics")
         self.dyn_plane_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         dyn_plane_layout = QVBoxLayout(self.dyn_plane_group)
-        self.vector_dev_log_check = self._add_checkbox(dyn_plane_layout, "Vector Deviation Log")
-        self.correction_factor_trace_check = self._add_checkbox(dyn_plane_layout, "Correction Factor Trace")
-        self.input_snapshots_check = self._add_checkbox(dyn_plane_layout, "Input Snapshots (Sample)")
+        self.vector_dev_log_check = self._add_checkbox(dyn_plane_layout, "Vector Deviation Log", "run_output.dynamic_plane_diagnostics.vector_deviation_log")
+        self.correction_factor_trace_check = self._add_checkbox(dyn_plane_layout, "Correction Factor Trace", "run_output.dynamic_plane_diagnostics.correction_factor_trace")
+        self.input_snapshots_check = self._add_checkbox(dyn_plane_layout, "Input Snapshots (Sample)", "run_output.dynamic_plane_diagnostics.input_snapshots")
         metrics_layout.addWidget(self.dyn_plane_group)
 
         for checkbox in self.all_checkboxes:
@@ -80,8 +85,9 @@ class RunOutputWidget(QWidget):
     def set_dynamic_plane_diagnostics_visibility(self, visible):
         self.dyn_plane_group.setVisible(visible)
 
-    def _add_checkbox(self, layout, text):
+    def _add_checkbox(self, layout, text, object_name):
         checkbox = QCheckBox(text)
+        checkbox.setObjectName(object_name)
         self.all_checkboxes.append(checkbox)
         layout.addWidget(checkbox)
         return checkbox

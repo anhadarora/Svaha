@@ -17,6 +17,7 @@ class ErrorCorrectionWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("error_correction")
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
@@ -34,6 +35,7 @@ class ErrorCorrectionWidget(QWidget):
 
     def _create_standard_ui(self):
         container = QWidget()
+        container.setObjectName("error_correction.standard")
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -44,10 +46,12 @@ class ErrorCorrectionWidget(QWidget):
         grid_layout = QGridLayout(group)
 
         self.loss_function_combo = QComboBox()
+        self.loss_function_combo.setObjectName("error_correction.standard.loss_function")
         self.loss_function_combo.addItems(["Mean Squared Error (MSE)", "Mean Absolute Error (MAE)"])
         self._add_grid_row(grid_layout, 0, "Loss Function:", self.loss_function_combo)
 
         self.patience_spinbox = QSpinBox()
+        self.patience_spinbox.setObjectName("error_correction.standard.patience")
         self.patience_spinbox.setRange(1, 1000)
         self.patience_spinbox.setValue(10)
         self.patience_spinbox.setSuffix(" epochs")
@@ -57,6 +61,7 @@ class ErrorCorrectionWidget(QWidget):
 
     def _create_dynamic_plane_ui(self):
         container = QWidget()
+        container.setObjectName("error_correction.dynamic_plane")
         layout = QVBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -67,12 +72,14 @@ class ErrorCorrectionWidget(QWidget):
         grid_layout = QGridLayout(group)
 
         self.drift_threshold_spinbox = QDoubleSpinBox()
+        self.drift_threshold_spinbox.setObjectName("error_correction.dynamic_plane.drift_threshold")
         self.drift_threshold_spinbox.setRange(0.0, 1.0)
         self.drift_threshold_spinbox.setSingleStep(0.01)
         self.drift_threshold_spinbox.setValue(0.05)
         self._add_grid_row(grid_layout, 0, "Drift Threshold:", self.drift_threshold_spinbox)
 
         self.healing_decay_rate_spinbox = QDoubleSpinBox()
+        self.healing_decay_rate_spinbox.setObjectName("error_correction.dynamic_plane.healing_decay_rate")
         self.healing_decay_rate_spinbox.setRange(0.0, 1.0)
         self.healing_decay_rate_spinbox.setSingleStep(0.01)
         self.healing_decay_rate_spinbox.setValue(0.1)

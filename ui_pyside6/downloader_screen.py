@@ -37,6 +37,7 @@ class Communicate(QObject):
 class DownloaderScreen(QWidget):
     def __init__(self, session_manager):
         super().__init__()
+        self.setObjectName("downloader")
         self.session_manager = session_manager
         self.master_df = None
 
@@ -58,10 +59,12 @@ class DownloaderScreen(QWidget):
         main_layout.setSpacing(15)
 
         self.tab_widget = QTabWidget()
+        self.tab_widget.setObjectName("downloader.tab_widget")
         main_layout.addWidget(self.tab_widget)
 
         # --- Tab 1: New Job ---
         new_job_widget = QWidget()
+        new_job_widget.setObjectName("downloader.new_job")
         new_job_layout = QVBoxLayout(new_job_widget)
         new_job_layout.setContentsMargins(0, 0, 0, 0)
         new_job_layout.setSpacing(15)
@@ -73,7 +76,9 @@ class DownloaderScreen(QWidget):
         tickers_layout = QHBoxLayout(tickers_group)
         
         self.available_symbols_list = QListWidget()
+        self.available_symbols_list.setObjectName("downloader.new_job.available_symbols")
         self.selected_symbols_list = QListWidget()
+        self.selected_symbols_list.setObjectName("downloader.new_job.selected_symbols")
         
         tickers_layout.addWidget(self.create_symbol_browser())
         tickers_layout.addWidget(self.selected_symbols_list)
@@ -83,8 +88,10 @@ class DownloaderScreen(QWidget):
         new_job_layout.addWidget(date_group)
         date_layout = QHBoxLayout(date_group)
         self.start_date_edit = QDateEdit(QDate.currentDate().addYears(-1))
+        self.start_date_edit.setObjectName("downloader.new_job.start_date")
         self.start_date_edit.setCalendarPopup(True)
         self.end_date_edit = QDateEdit(QDate.currentDate())
+        self.end_date_edit.setObjectName("downloader.new_job.end_date")
         self.end_date_edit.setCalendarPopup(True)
         date_layout.addWidget(QLabel("Start Date:"))
         date_layout.addWidget(self.start_date_edit)
@@ -98,12 +105,15 @@ class DownloaderScreen(QWidget):
         interval_layout = QVBoxLayout(interval_group)
         
         self.interval_combo = QComboBox()
+        self.interval_combo.setObjectName("downloader.new_job.interval")
         self.interval_combo.addItems(["minute", "3minute", "5minute", "10minute", "15minute", "30minute", "60minute", "day"])
         interval_layout.addWidget(self.interval_combo)
         
         storage_layout = QHBoxLayout()
         self.output_dir_edit = QLineEdit("./generated_data")
+        self.output_dir_edit.setObjectName("downloader.new_job.output_dir_input")
         self.output_dir_button = QPushButton("...")
+        self.output_dir_button.setObjectName("downloader.new_job.output_dir_button")
         storage_layout.addWidget(QLabel("Output Directory:"))
         storage_layout.addWidget(self.output_dir_edit)
         storage_layout.addWidget(self.output_dir_button)
@@ -111,6 +121,7 @@ class DownloaderScreen(QWidget):
 
         # --- Tab 2: Resume Job ---
         resume_job_widget = QWidget()
+        resume_job_widget.setObjectName("downloader.resume_job")
         resume_job_layout = QVBoxLayout(resume_job_widget)
         self.tab_widget.addTab(resume_job_widget, "Resume Download Job")
         
@@ -118,8 +129,10 @@ class DownloaderScreen(QWidget):
         resume_job_layout.addWidget(manifest_group)
         manifest_layout = QHBoxLayout(manifest_group)
         self.manifest_file_edit = QLineEdit()
+        self.manifest_file_edit.setObjectName("downloader.resume_job.manifest_path_input")
         self.manifest_file_edit.setPlaceholderText("Select a manifest.json file to resume a download")
         self.manifest_file_button = QPushButton("...")
+        self.manifest_file_button.setObjectName("downloader.resume_job.manifest_path_button")
         manifest_layout.addWidget(self.manifest_file_edit)
         manifest_layout.addWidget(self.manifest_file_button)
         resume_job_layout.addStretch()
@@ -129,14 +142,16 @@ class DownloaderScreen(QWidget):
         main_layout.addWidget(execution_group)
         execution_layout = QVBoxLayout(execution_group)
         self.progress_bar = QProgressBar()
+        self.progress_bar.setObjectName("downloader.progress_bar")
         self.log_view = QTextEdit()
+        self.log_view.setObjectName("downloader.log_view")
         self.log_view.setReadOnly(True)
         execution_layout.addWidget(self.progress_bar)
         execution_layout.addWidget(self.log_view)
 
         # --- Shared Action Button ---
         self.start_button = QPushButton("START DOWNLOAD")
-        self.start_button.setObjectName("primary_button") # For styling
+        self.start_button.setObjectName("downloader.start_button")
         self.start_button.setMinimumHeight(40)
         main_layout.addWidget(self.start_button, 0, Qt.AlignRight)
 
@@ -146,8 +161,10 @@ class DownloaderScreen(QWidget):
         
         filter_layout = QHBoxLayout()
         self.search_filter = QLineEdit()
+        self.search_filter.setObjectName("downloader.new_job.symbol_search")
         self.search_filter.setPlaceholderText("Search available symbols...")
         self.sector_filter = QComboBox()
+        self.sector_filter.setObjectName("downloader.new_job.sector_filter")
         filter_layout.addWidget(self.search_filter)
         filter_layout.addWidget(self.sector_filter)
         

@@ -26,6 +26,7 @@ class ModelInputParametersWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("input_params")
         # --- Color State ---
         self.up_color = QColor("#26a69a")
         self.down_color = QColor("#ef5350")
@@ -45,24 +46,30 @@ class ModelInputParametersWidget(QWidget):
 
         # --- Data Processing Group ---
         processing_group = QGroupBox("Data Processing")
+        processing_group.setObjectName("input_params.data_processing")
         layout.addWidget(processing_group)
         processing_layout = QGridLayout(processing_group)
         
         self.resampling_factor_spinbox = self._create_spinbox(1, 1000, 1)
+        self.resampling_factor_spinbox.setObjectName("input_params.data_processing.resampling_factor")
         self._add_grid_row(processing_layout, 0, "Resampling Factor:", self.resampling_factor_spinbox, "e.g., set to 60 to construct 1-hour candles from 1-minute source data.")
         
         self.input_window_size_n_spinbox = self._create_spinbox(1, 15, 5)
+        self.input_window_size_n_spinbox.setObjectName("input_params.data_processing.input_window_size")
         self._add_grid_row(processing_layout, 1, "Input Window Size (N):", self.input_window_size_n_spinbox, "Number of candles in a single training sample.")
 
         self.prediction_horizon_k_spinbox = self._create_spinbox(1, 100, 1)
+        self.prediction_horizon_k_spinbox.setObjectName("input_params.data_processing.prediction_horizon")
         self._add_grid_row(processing_layout, 2, "Prediction Horizon (k):", self.prediction_horizon_k_spinbox, "How many steps into the future the label represents.")
 
         # --- Chart & Tensor Group ---
         chart_group = QGroupBox("Chart & Tensor Settings")
+        chart_group.setObjectName("input_params.chart_tensor")
         layout.addWidget(chart_group)
         chart_layout = QGridLayout(chart_group)
 
         self.chart_type_combo = QComboBox()
+        self.chart_type_combo.setObjectName("input_params.chart_tensor.chart_type")
         self.chart_type_combo.addItems([
             "Candlestick", "Heikin-Ashi", "Line", "OHLC Bar", 
             "Hollow Candlestick", "Renko", "Point & Figure", "Dynamic 2D Plane"
@@ -70,6 +77,7 @@ class ModelInputParametersWidget(QWidget):
         self._add_grid_row(chart_layout, 0, "Chart Type:", self.chart_type_combo)
 
         self.channel_depth_combo = QComboBox()
+        self.channel_depth_combo.setObjectName("input_params.chart_tensor.channel_depth")
         self.channel_depth_combo.addItems(["Grayscale (1ch)", "RGB (3ch)", "RGB + Delta"])
         self._add_grid_row(chart_layout, 1, "Tensor Channel Depth:", self.channel_depth_combo)
 
@@ -85,6 +93,7 @@ class ModelInputParametersWidget(QWidget):
 
         # --- Disk Space Estimation ---
         estimation_group = QGroupBox("Disk Space Estimation")
+        estimation_group.setObjectName("input_params.disk_space")
         layout.addWidget(estimation_group)
         estimation_layout = QGridLayout(estimation_group)
 
@@ -94,6 +103,7 @@ class ModelInputParametersWidget(QWidget):
         self.total_size_label = QLabel("N/A")
         self.total_files_label = QLabel("N/A")
         self.calculate_total_size_button = QPushButton("Calculate Total")
+        self.calculate_total_size_button.setObjectName("input_params.disk_space.calculate_button")
         estimation_layout.addWidget(QLabel("Estimated Total:"), 1, 0)
         estimation_layout.addWidget(self.total_size_label, 1, 1)
         estimation_layout.addWidget(self.total_files_label, 1, 2)
@@ -214,6 +224,7 @@ class ModelInputParametersWidget(QWidget):
 
     def _create_style_settings_widget(self):
         container = QWidget()
+        container.setObjectName("input_params.style_settings")
         layout = QVBoxLayout(container)
         layout.setSpacing(15)
 
@@ -222,18 +233,23 @@ class ModelInputParametersWidget(QWidget):
         res_layout = QGridLayout(res_group)
         
         self.target_height_spinbox = self._create_spinbox(32, 1024, 64)
+        self.target_height_spinbox.setObjectName("input_params.style_settings.target_height")
         self._add_grid_row(res_layout, 0, "Target Height (px):", self.target_height_spinbox)
         
         self.target_width_spinbox = self._create_spinbox(32, 1024, 128)
+        self.target_width_spinbox.setObjectName("input_params.style_settings.target_width")
         self._add_grid_row(res_layout, 1, "Target Width (px):", self.target_width_spinbox)
 
         self.bar_width_px_spinbox = self._create_spinbox(1, 20, 5)
+        self.bar_width_px_spinbox.setObjectName("input_params.style_settings.bar_width")
         self._add_grid_row(res_layout, 0, "Bar Width (px):", self.bar_width_px_spinbox, column=2)
 
         self.border_thickness_px_spinbox = self._create_spinbox(0, 5, 1)
+        self.border_thickness_px_spinbox.setObjectName("input_params.style_settings.border_thickness")
         self._add_grid_row(res_layout, 1, "Border Thickness (px):", self.border_thickness_px_spinbox, column=2)
 
         self.line_width_px_spinbox = self._create_spinbox(1, 10, 2)
+        self.line_width_px_spinbox.setObjectName("input_params.style_settings.line_width")
         self._add_grid_row(res_layout, 2, "Line Width (px):", self.line_width_px_spinbox, column=2)
 
         display_group = QGroupBox("Color & Display")
@@ -241,9 +257,13 @@ class ModelInputParametersWidget(QWidget):
         display_layout = QGridLayout(display_group)
 
         self.up_color_button = QPushButton("Up Color")
+        self.up_color_button.setObjectName("input_params.style_settings.up_color_button")
         self.down_color_button = QPushButton("Down Color")
+        self.down_color_button.setObjectName("input_params.style_settings.down_color_button")
         self.bg_color_button = QPushButton("Background Color")
+        self.bg_color_button.setObjectName("input_params.style_settings.bg_color_button")
         self.line_color_button = QPushButton("Line Color")
+        self.line_color_button.setObjectName("input_params.style_settings.line_color_button")
         
         self._update_button_style(self.up_color_button, self.up_color)
         self._update_button_style(self.down_color_button, self.down_color)
@@ -261,10 +281,12 @@ class ModelInputParametersWidget(QWidget):
         self.line_color_button.clicked.connect(lambda: self._pick_color(self.line_color_button, 'line_color'))
 
         self.scaling_mode_combo = QComboBox()
+        self.scaling_mode_combo.setObjectName("input_params.style_settings.scaling_mode")
         self.scaling_mode_combo.addItems(["Local Min-Max", "Global Min-Max", "Logarithmic"])
         self._add_grid_row(display_layout, 1, "Scaling Mode:", self.scaling_mode_combo)
 
         self.volume_display_combo = QComboBox()
+        self.volume_display_combo.setObjectName("input_params.style_settings.volume_display")
         self.volume_display_combo.addItems(["None", "Overlay", "Bottom Subplot", "Color-Coded"])
         self._add_grid_row(display_layout, 2, "Volume Display:", self.volume_display_combo)
 
@@ -272,7 +294,9 @@ class ModelInputParametersWidget(QWidget):
         layout.addWidget(overlays_group)
         overlays_layout = QGridLayout(overlays_group)
         self.ma_checkbox = QCheckBox("Moving Average")
+        self.ma_checkbox.setObjectName("input_params.style_settings.moving_average_enabled")
         self.ma_period_spinbox = self._create_spinbox(2, 200, 20)
+        self.ma_period_spinbox.setObjectName("input_params.style_settings.moving_average_period")
         self.ma_period_spinbox.setEnabled(False)
         self.ma_checkbox.toggled.connect(self.ma_period_spinbox.setEnabled)
         overlays_layout.addWidget(self.ma_checkbox, 0, 0)
@@ -283,6 +307,7 @@ class ModelInputParametersWidget(QWidget):
 
     def _create_dynamic_plane_widget(self):
         container = QGroupBox("Dynamic Plane Configuration")
+        container.setObjectName("input_params.dynamic_plane")
         layout = QGridLayout(container)
         layout.setSpacing(15)
         
@@ -290,8 +315,11 @@ class ModelInputParametersWidget(QWidget):
         basis_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         basis_layout = QHBoxLayout(basis_group)
         self.time_basis_check = QCheckBox("Time")
+        self.time_basis_check.setObjectName("input_params.dynamic_plane.basis_vector_time")
         self.price_basis_check = QCheckBox("Price")
+        self.price_basis_check.setObjectName("input_params.dynamic_plane.basis_vector_price")
         self.volume_basis_check = QCheckBox("Volume")
+        self.volume_basis_check.setObjectName("input_params.dynamic_plane.basis_vector_volume")
         self.time_basis_check.setChecked(True)
         self.price_basis_check.setChecked(True)
         basis_layout.addWidget(self.time_basis_check)
@@ -300,24 +328,29 @@ class ModelInputParametersWidget(QWidget):
         layout.addWidget(basis_group, 0, 0, 1, 2)
 
         self.norm_strategy_combo = QComboBox()
+        self.norm_strategy_combo.setObjectName("input_params.dynamic_plane.normalization_strategy")
         self.norm_strategy_combo.addItems(["Standard Z-Score", "Robust Relational"])
         self._add_grid_row(layout, 1, "Normalization Strategy:", self.norm_strategy_combo)
 
         self.rotation_logic_combo = QComboBox()
+        self.rotation_logic_combo.setObjectName("input_params.dynamic_plane.rotation_logic")
         self.rotation_logic_combo.addItems(["Dynamic", "Freeze & Correct"])
         self._add_grid_row(layout, 2, "Rotation Logic:", self.rotation_logic_combo)
         
         self.reference_point_strategy = QComboBox()
+        self.reference_point_strategy.setObjectName("input_params.dynamic_plane.reference_point_strategy")
         self.reference_point_strategy.addItems(['Previous Close', 'Window Mean', 'EMA Trend'])
         self._add_grid_row(layout, 3, "Reference Point Strategy:", self.reference_point_strategy)
 
         self.outlier_clip_percentile = QDoubleSpinBox()
+        self.outlier_clip_percentile.setObjectName("input_params.dynamic_plane.outlier_clip_percentile")
         self.outlier_clip_percentile.setRange(90.0, 100.0)
         self.outlier_clip_percentile.setValue(99.0)
         self.outlier_clip_percentile.setSingleStep(0.1)
         self._add_grid_row(layout, 4, "Outlier Clip Percentile:", self.outlier_clip_percentile)
 
         self.drift_error_check = QCheckBox("Include Frame Drift Error")
+        self.drift_error_check.setObjectName("input_params.dynamic_plane.include_drift_error")
         layout.addWidget(self.drift_error_check, 5, 0, 1, 2)
 
         return container

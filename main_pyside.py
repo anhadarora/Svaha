@@ -4,6 +4,7 @@ from ui_pyside6.main_screen import MainScreen
 from ui_pyside6.session_manager import SessionManager
 from api.kite.client import kite_api
 from ui_pyside6.user_screen import UserScreen
+from ui_pyside6.widgets.tooltip_system import TooltipManager, TooltipEventFilter
 
 
 class MainWindow(QMainWindow):
@@ -41,6 +42,13 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
+    # --- Tooltip System Setup ---
+    tooltip_manager = TooltipManager()
+    tooltip_manager.load_tooltips()
+    tooltip_event_filter = TooltipEventFilter(tooltip_manager)
+    app.installEventFilter(tooltip_event_filter)
+    # --------------------------
 
     # Load and apply stylesheet
     try:

@@ -17,6 +17,7 @@ class FileSavingWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("file_saving")
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
@@ -29,17 +30,20 @@ class FileSavingWidget(QWidget):
         self.model_path_edit = self._create_path_selector(
             layout, 
             "Model Save Path:", 
-            os.path.abspath("./build/models")
+            os.path.abspath("./build/models"),
+            "model_save_path"
         )
         self.training_data_path_edit = self._create_path_selector(
             layout, 
             "Training Data (Images) Path:", 
-            os.path.abspath("./build/data/training")
+            os.path.abspath("./build/data/training"),
+            "training_data_path"
         )
         self.augmented_data_path_edit = self._create_path_selector(
             layout, 
             "Augmented Data Path:", 
-            os.path.abspath("./build/data/augmented")
+            os.path.abspath("./build/data/augmented"),
+            "augmented_data_path"
         )
 
     def connect_signals(self):
@@ -47,14 +51,21 @@ class FileSavingWidget(QWidget):
         self.training_data_path_edit.textChanged.connect(self.configuration_changed)
         self.augmented_data_path_edit.textChanged.connect(self.configuration_changed)
 
-    def _create_path_selector(self, parent_layout, label_text, default_path):
+    def _create_path_selector(self, parent_layout, label_text, default_path, object_name_base):
         layout = QHBoxLayout()
-        layout.addWidget(QLabel(label_text))
+        label = QLabel(label_text)
+        layout.addWidget(label)
+        
         line_edit = QLineEdit(default_path)
+        line_edit.setObjectName(f"file_saving.{object_name_base}_input")
+        label.setBuddy(line_edit)
         layout.addWidget(line_edit)
+        
         button = QPushButton("Browse...")
+        button.setObjectName(f"file_saving.{object_name_base}_browse_button")
         button.clicked.connect(lambda: self._open_directory_dialog(line_edit))
         layout.addWidget(button)
+        
         parent_layout.addLayout(layout)
         return line_edit
 

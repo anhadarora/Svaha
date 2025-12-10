@@ -22,16 +22,19 @@ class ModelArchitectureWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("model_arch")
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(15)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         # --- 1. Backbone Architecture ---
         backbone_group = QGroupBox("Backbone Architecture (Vision Encoder)")
+        backbone_group.setObjectName("model_arch.backbone")
         self.layout.addWidget(backbone_group)
         backbone_layout = QGridLayout(backbone_group)
 
         self.architecture_selection = QComboBox()
+        self.architecture_selection.setObjectName("model_arch.backbone.architecture")
         self.architecture_selection.addItems([
             "EfficientNet-B7",
             "ResNet-50",
@@ -42,9 +45,11 @@ class ModelArchitectureWidget(QWidget):
         architecture_label.setBuddy(self.architecture_selection)
         
         self.pretrained_weights = QCheckBox("Use Pre-trained Weights (ImageNet)")
+        self.pretrained_weights.setObjectName("model_arch.backbone.use_pretrained")
         self.pretrained_weights.setChecked(True)
         
         self.freeze_backbone = QCheckBox("Freeze Backbone (Transfer Learning)")
+        self.freeze_backbone.setObjectName("model_arch.backbone.freeze_backbone")
         self.freeze_backbone.setChecked(True)
 
         backbone_layout.addWidget(architecture_label, 0, 0)
@@ -54,10 +59,12 @@ class ModelArchitectureWidget(QWidget):
 
         # --- 2. Sequence Modeling ---
         self.sequence_group = QGroupBox("Sequence Modeling (Temporal Aggregator)")
+        self.sequence_group.setObjectName("model_arch.sequence_modeling")
         self.layout.addWidget(self.sequence_group)
         sequence_layout = QFormLayout(self.sequence_group)
 
         self.temporal_aggregator = QComboBox()
+        self.temporal_aggregator.setObjectName("model_arch.sequence_modeling.aggregator")
         self.temporal_aggregator.addItems([
             "None (Channel Stack)",
             "Time-Distributed CNN + LSTM",
@@ -67,11 +74,13 @@ class ModelArchitectureWidget(QWidget):
 
         # --- 3. Prediction Heads ---
         heads_group = QGroupBox("Prediction Heads (Task Definition)")
+        heads_group.setObjectName("model_arch.prediction_heads")
         self.layout.addWidget(heads_group)
         heads_layout = QVBoxLayout(heads_group)
         
         primary_head_layout = QFormLayout()
         self.primary_output = QComboBox()
+        self.primary_output.setObjectName("model_arch.prediction_heads.primary_output")
         self.primary_output.addItems([
             "Scalar Regression (Return %)",
             "Classification (Buy/Sell/Hold)",
@@ -82,7 +91,9 @@ class ModelArchitectureWidget(QWidget):
         aux_heads_group = QGroupBox("Auxiliary Heads (Multi-Task Learning)")
         aux_heads_layout = QVBoxLayout(aux_heads_group)
         self.rally_time_prediction = QCheckBox("Rally Time Prediction (Regression)")
+        self.rally_time_prediction.setObjectName("model_arch.prediction_heads.aux_rally_time")
         self.directional_confidence = QCheckBox("Directional Confidence (Classification)")
+        self.directional_confidence.setObjectName("model_arch.prediction_heads.aux_directional_confidence")
         aux_heads_layout.addWidget(self.rally_time_prediction)
         aux_heads_layout.addWidget(self.directional_confidence)
         heads_layout.addWidget(aux_heads_group)
@@ -92,12 +103,14 @@ class ModelArchitectureWidget(QWidget):
         
         hidden_units_label = QLabel("Hidden Units:")
         self.hidden_units = QSpinBox()
+        self.hidden_units.setObjectName("model_arch.prediction_heads.hidden_units")
         self.hidden_units.setRange(64, 4096)
         self.hidden_units.setValue(512)
         hidden_units_label.setBuddy(self.hidden_units)
 
         dropout_label = QLabel("Dropout:")
         self.dropout = QDoubleSpinBox()
+        self.dropout.setObjectName("model_arch.prediction_heads.dropout")
         self.dropout.setRange(0.0, 0.9)
         self.dropout.setSingleStep(0.05)
         self.dropout.setValue(0.2)
@@ -105,6 +118,7 @@ class ModelArchitectureWidget(QWidget):
 
         activation_label = QLabel("Activation:")
         self.activation = QComboBox()
+        self.activation.setObjectName("model_arch.prediction_heads.activation")
         self.activation.addItems(["ReLU", "GeLU", "SiLU"])
         activation_label.setBuddy(self.activation)
 
@@ -118,37 +132,44 @@ class ModelArchitectureWidget(QWidget):
 
         # --- 4. Training Hyperparameters ---
         hyperparams_group = QGroupBox("Training Hyperparameters")
+        hyperparams_group.setObjectName("model_arch.hyperparameters")
         self.layout.addWidget(hyperparams_group)
         hyperparams_layout = QGridLayout(hyperparams_group)
 
         lr_label = QLabel("Learning Rate:")
         self.learning_rate = QLineEdit("1e-3")
+        self.learning_rate.setObjectName("model_arch.hyperparameters.learning_rate")
         lr_label.setBuddy(self.learning_rate)
 
         optimizer_label = QLabel("Optimizer:")
         self.optimizer = QComboBox()
+        self.optimizer.setObjectName("model_arch.hyperparameters.optimizer")
         self.optimizer.addItems(["Adam", "SGD", "RMSprop", "AdamW"])
         optimizer_label.setBuddy(self.optimizer)
 
         loss_label = QLabel("Loss Function:")
         self.loss_function = QComboBox()
+        self.loss_function.setObjectName("model_arch.hyperparameters.loss_function")
         self.loss_function.addItems(["MSE", "MAE", "Huber"])
         loss_label.setBuddy(self.loss_function)
 
         batch_size_label = QLabel("Batch Size:")
         self.batch_size = QSpinBox()
+        self.batch_size.setObjectName("model_arch.hyperparameters.batch_size")
         self.batch_size.setRange(1, 8192)
         self.batch_size.setValue(32)
         batch_size_label.setBuddy(self.batch_size)
 
         epochs_label = QLabel("Max Epochs:")
         self.max_epochs = QSpinBox()
+        self.max_epochs.setObjectName("model_arch.hyperparameters.max_epochs")
         self.max_epochs.setRange(1, 1000)
         self.max_epochs.setValue(100)
         epochs_label.setBuddy(self.max_epochs)
 
         patience_label = QLabel("Early Stopping Patience:")
         self.early_stopping_patience = QSpinBox()
+        self.early_stopping_patience.setObjectName("model_arch.hyperparameters.early_stopping_patience")
         self.early_stopping_patience.setRange(0, 100)
         self.early_stopping_patience.setValue(10)
         patience_label.setBuddy(self.early_stopping_patience)
@@ -168,17 +189,20 @@ class ModelArchitectureWidget(QWidget):
 
         # --- 5. Input Constraints ---
         constraints_group = QGroupBox("Input Constraints")
+        constraints_group.setObjectName("model_arch.input_constraints")
         self.layout.addWidget(constraints_group)
         constraints_layout = QGridLayout(constraints_group)
 
         channels_label = QLabel("Input Channels:")
         self.input_channels = QSpinBox()
+        self.input_channels.setObjectName("model_arch.input_constraints.input_channels")
         self.input_channels.setRange(1, 64)
         self.input_channels.setValue(3)
         channels_label.setBuddy(self.input_channels)
 
         resolution_label = QLabel("Target Resolution:")
         self.target_resolution_display = QLineEdit("e.g., 64x128")
+        self.target_resolution_display.setObjectName("model_arch.input_constraints.target_resolution")
         self.target_resolution_display.setReadOnly(True)
         self.target_resolution_display.setStyleSheet("background-color: #2a2a2a;")
         resolution_label.setBuddy(self.target_resolution_display)

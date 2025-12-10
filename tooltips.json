@@ -1,0 +1,258 @@
+{
+    "downloader.tab_widget": {
+        "title": "Downloader Mode",
+        "content": "Switch between creating a new download job or resuming a previous one."
+    },
+    "downloader.new_job.available_symbols": {
+        "title": "Available Instruments",
+        "content": "Lists all instruments that can be downloaded. Double-click to add an instrument to the download queue."
+    },
+    "downloader.new_job.selected_symbols": {
+        "title": "Selected Instruments (Download Queue)",
+        "content": "All instruments in this list will be downloaded when the job starts. Double-click to remove an instrument."
+    },
+    "downloader.new_job.symbol_search": {
+        "title": "Symbol Search",
+        "content": "Filter the list of available instruments by their symbol (e.g., 'RELIANCE')."
+    },
+    "downloader.new_job.sector_filter": {
+        "title": "Sector Filter",
+        "content": "Filter the list of available instruments by their industry sector."
+    },
+    "downloader.new_job.start_date": {
+        "title": "Start Date",
+        "content": "The beginning of the date range for which to download historical data."
+    },
+    "downloader.new_job.end_date": {
+        "title": "End Date",
+        "content": "The end of the date range for which to download historical data."
+    },
+    "downloader.new_job.interval": {
+        "title": "Interval",
+        "content": "The time interval for each data candle (e.g., 'minute', 'day')."
+    },
+    "downloader.new_job.output_dir_input": {
+        "title": "Output Directory",
+        "content": "The folder where the downloaded data files will be saved."
+    },
+    "downloader.new_job.output_dir_button": {
+        "title": "Browse for Directory",
+        "content": "Open a file dialog to select the output directory."
+    },
+    "downloader.resume_job.manifest_path_input": {
+        "title": "Manifest File Path",
+        "content": "Path to a `manifest.json` file from a previously stopped download job."
+    },
+    "downloader.resume_job.manifest_path_button": {
+        "title": "Browse for Manifest",
+        "content": "Open a file dialog to select a `manifest.json` file."
+    },
+    "downloader.progress_bar": {
+        "title": "Download Progress",
+        "content": "Shows the overall progress of the current download job."
+    },
+    "downloader.log_view": {
+        "title": "Log Output",
+        "content": "Displays real-time log messages from the downloader."
+    },
+    "downloader.start_button": {
+        "title": "Start Download",
+        "content": "Begins the download process based on the settings in the currently active tab (New Job or Resume Job)."
+    },
+    "data_source.time_interval": {
+        "title": "Time Interval",
+        "content": "Filters the available downloaded data by its time interval. This must match the data you intend to use for training."
+    },
+    "data_source.instrument_selection.search": {
+        "title": "Symbol Search",
+        "content": "Filter the list of available instruments by typing a part of the symbol name (e.g., 'RELIANCE')."
+    },
+    "data_source.instrument_selection.sector_filter": {
+        "title": "Sector Filter",
+        "content": "Filter the list of available instruments by their industry sector."
+    },
+    "data_source.instrument_selection.index_filter": {
+        "title": "Index Filter",
+        "content": "Filter the list of available instruments by the index they belong to (e.g., 'Nifty 50')."
+    },
+    "data_source.instrument_selection.available_list": {
+        "title": "Available Instruments",
+        "content": "This list shows all instruments that match the current filter criteria. Double-click an instrument to add it to the selected list."
+    },
+    "data_source.instrument_selection.selected_list": {
+        "title": "Selected Instruments",
+        "content": "This list contains all the instruments that will be included in the dataset for training. Double-click an instrument to remove it."
+    },
+    "data_source.instrument_selection.add_button": {
+        "title": "Add to Selection",
+        "content": "Add the highlighted instruments from the 'Available' list to the 'Selected' list."
+    },
+    "data_source.instrument_selection.remove_button": {
+        "title": "Remove from Selection",
+        "content": "Remove the highlighted instruments from the 'Selected' list."
+    },
+    "data_source.instrument_selection.add_all_button": {
+        "title": "Add All",
+        "content": "Add all currently visible instruments from the 'Available' list to the 'Selected' list."
+    },
+    "data_source.instrument_selection.remove_all_button": {
+        "title": "Remove All",
+        "content": "Remove all instruments from the 'Selected' list."
+    },
+    "data_source.master_date_range.start_date": {
+        "title": "Master Start Date",
+        "content": "The absolute earliest date from which to consider data for this experiment. The available range is determined by the common date range of all selected instruments."
+    },
+    "data_source.master_date_range.end_date": {
+        "title": "Master End Date",
+        "content": "The absolute latest date to which to consider data for this experiment."
+    },
+    "data_source.validation_method.split_method": {
+        "title": "Validation Method",
+        "content": "Determines how the master data range is split into training and validation sets.",
+        "options": {
+            "Date Range": "Manually define specific start and end dates for both training and validation sets. Gives you full control.",
+            "Percentage Split": "Automatically splits the data. The most recent data is reserved for validation based on the percentage you set.",
+            "Time-Series K-Fold": "Performs cross-validation by creating multiple 'folds' of training/validation splits over time. More robust, but computationally expensive."
+        }
+    },
+    "data_source.validation_method.date_range.training_start": {
+        "title": "Training Start Date",
+        "content": "The first day of the training dataset."
+    },
+    "data_source.validation_method.date_range.training_end": {
+        "title": "Training End Date",
+        "content": "The last day of the training dataset. Must be before the validation start date."
+    },
+    "data_source.validation_method.date_range.validation_start": {
+        "title": "Validation Start Date",
+        "content": "The first day of the validation dataset."
+    },
+    "data_source.validation_method.date_range.validation_end": {
+        "title": "Validation End Date",
+        "content": "The last day of the validation dataset."
+    },
+    "data_source.validation_method.percentage_split.validation_percentage": {
+        "title": "Validation Percentage",
+        "content": "The percentage of the most recent data to reserve for the validation set. The rest will be used for training."
+    },
+    "data_source.validation_method.kfold.k_folds": {
+        "title": "Number of Folds (K)",
+        "content": "The number of sequential train/validation splits to create. A value of 5 means the data will be split into 5 chunks, and the model will be trained 5 times."
+    },
+    "input_params.data_processing.resampling_factor": {
+        "title": "Resampling Factor",
+        "content": "Groups the source data into larger candles. For example, a factor of **60** on 'minute' data will create **1-hour** candles."
+    },
+    "input_params.data_processing.input_window_size": {
+        "title": "Input Window Size (N)",
+        "content": "The number of candles that constitute a single training sample (e.g., a single image)."
+    },
+    "input_params.data_processing.prediction_horizon": {
+        "title": "Prediction Horizon (k)",
+        "content": "How many steps (candles) into the future the model should try to predict. The label for a sample at time `t` will be derived from data at `t+k`."
+    },
+    "input_params.chart_tensor.chart_type": {
+        "title": "Chart Type",
+        "content": "Determines how the raw OHLCV data is transformed into a 2D representation (an image tensor) for the model.",
+        "options": {
+            "Candlestick": "Standard financial chart. Good for capturing price action patterns.",
+            "Heikin-Ashi": "A modified candlestick chart that smooths price action and makes trends easier to identify.",
+            "Dynamic 2D Plane": "An advanced, abstract representation that uses basis vectors (Time, Price, Volume) to plot data points in a 2D space. Disables visual styling options."
+        }
+    },
+    "input_params.chart_tensor.channel_depth": {
+        "title": "Tensor Channel Depth",
+        "content": "The number of color channels in the generated image tensor.",
+        "options": {
+            "Grayscale (1ch)": "A single channel, representing intensity.",
+            "RGB (3ch)": "Three channels for Red, Green, and Blue. Can encode more information.",
+            "RGB + Delta": "Four channels, adding a custom 'delta' channel for extra data."
+        }
+    },
+    "input_params.style_settings.target_height": { "title": "Target Height (px)", "content": "The height of the generated image tensor in pixels." },
+    "input_params.style_settings.target_width": { "title": "Target Width (px)", "content": "The width of the generated image tensor in pixels." },
+    "input_params.style_settings.bar_width": { "title": "Bar Width (px)", "content": "The width of each candlestick or bar in the image." },
+    "input_params.style_settings.border_thickness": { "title": "Border Thickness (px)", "content": "The thickness of the border around each candlestick." },
+    "input_params.style_settings.line_width": { "title": "Line Width (px)", "content": "The width of lines used in line charts or for wicks." },
+    "input_params.style_settings.up_color_button": { "title": "Up Color", "content": "The color of candles that close higher than they open." },
+    "input_params.style_settings.down_color_button": { "title": "Down Color", "content": "The color of candles that close lower than they open." },
+    "input_params.style_settings.bg_color_button": { "title": "Background Color", "content": "The background color of the generated chart image." },
+    "input_params.style_settings.line_color_button": { "title": "Line Color", "content": "The color used for wicks and other line elements." },
+    "input_params.style_settings.scaling_mode": { "title": "Scaling Mode", "content": "Determines how price data is scaled to fit the image height." },
+    "input_params.style_settings.volume_display": { "title": "Volume Display", "content": "How trading volume is represented on the chart." },
+    "input_params.style_settings.moving_average_enabled": { "title": "Enable Moving Average", "content": "Check to overlay a simple moving average on the chart." },
+    "input_params.style_settings.moving_average_period": { "title": "Moving Average Period", "content": "The number of candles to include in the moving average calculation." },
+    "input_params.dynamic_plane.basis_vector_time": { "title": "Time Basis Vector", "content": "Use the time step as a horizontal (X-axis) basis vector." },
+    "input_params.dynamic_plane.basis_vector_price": { "title": "Price Basis Vector", "content": "Use price change as a vertical (Y-axis) basis vector." },
+    "input_params.dynamic_plane.basis_vector_volume": { "title": "Volume Basis Vector", "content": "Use trading volume to influence the position or color of points." },
+    "input_params.dynamic_plane.normalization_strategy": { "title": "Normalization Strategy", "content": "How the vector data is scaled before being plotted." },
+    "input_params.dynamic_plane.rotation_logic": { "title": "Rotation Logic", "content": "Determines how the frame of reference is rotated to align with the data." },
+    "input_params.dynamic_plane.reference_point_strategy": { "title": "Reference Point Strategy", "content": "The anchor point for all vector calculations within a sample." },
+    "input_params.dynamic_plane.outlier_clip_percentile": { "title": "Outlier Clip Percentile", "content": "Clips extreme data points at this percentile to prevent distorted scaling." },
+    "input_params.dynamic_plane.include_drift_error": { "title": "Include Frame Drift Error", "content": "Adds the rotational drift between frames as an additional input channel for the model." },
+    "input_params.disk_space.calculate_button": {
+        "title": "Calculate Total Size",
+        "content": "Scans the selected data source to provide an estimate of the total number of samples and the required disk space for the generated dataset."
+    },
+    "model_arch.backbone.architecture": { "title": "Backbone Architecture", "content": "The core vision model used to extract features from the input images." },
+    "model_arch.backbone.use_pretrained": { "title": "Use Pre-trained Weights", "content": "Initialize the backbone with weights pre-trained on the ImageNet dataset. This is highly recommended for transfer learning." },
+    "model_arch.backbone.freeze_backbone": { "title": "Freeze Backbone", "content": "Prevent the weights of the backbone model from being updated during training. This is typical for transfer learning where you only train the final layers." },
+    "model_arch.sequence_modeling.aggregator": {
+        "title": "Sequence Modeling Method",
+        "content": "How the model processes the sequence of N images in a sample.",
+        "options": {
+            "None (Channel Stack)": "The simplest method. The N images are stacked along the channel dimension, creating a tensor with N*C channels. Relies on the 2D CNN to find temporal patterns.",
+            "Time-Distributed CNN + LSTM": "Applies the vision backbone to each image individually, then feeds the sequence of feature vectors into an LSTM or GRU to model temporal dependencies.",
+            "Transformer Encoder": "A more advanced method where image features are treated as a sequence of tokens and processed by a Transformer, allowing the model to weigh the importance of different time steps."
+        }
+    },
+    "model_arch.prediction_heads.primary_output": { "title": "Primary Output", "content": "The main task the model is being trained to perform." },
+    "model_arch.prediction_heads.aux_rally_time": { "title": "Auxiliary Head: Rally Time", "content": "Adds a secondary output to the model that predicts how long it will take for the price to reach a certain target magnitude." },
+    "model_arch.prediction_heads.aux_directional_confidence": { "title": "Auxiliary Head: Directional Confidence", "content": "Adds a secondary output that predicts the probability that the primary direction prediction is correct." },
+    "model_arch.prediction_heads.hidden_units": { "title": "Hidden Units", "content": "The number of neurons in the hidden layers of the prediction head." },
+    "model_arch.prediction_heads.dropout": { "title": "Dropout", "content": "The fraction of neurons to randomly drop during training to prevent overfitting." },
+    "model_arch.prediction_heads.activation": { "title": "Activation Function", "content": "The non-linear activation function used in the prediction head layers." },
+    "model_arch.hyperparameters.learning_rate": { "title": "Learning Rate", "content": "Controls how much the model's weights are adjusted during training. Can be a fixed value (e.g., 0.001) or use scientific notation (e.g., 1e-4)." },
+    "model_arch.hyperparameters.optimizer": { "title": "Optimizer", "content": "The algorithm used to update the model's weights." },
+    "model_arch.hyperparameters.loss_function": { "title": "Loss Function", "content": "The function used to measure the error between the model's prediction and the true label." },
+    "model_arch.hyperparameters.batch_size": { "title": "Batch Size", "content": "The number of training samples processed before the model's weights are updated." },
+    "model_arch.hyperparameters.max_epochs": { "title": "Max Epochs", "content": "The maximum number of times the model will iterate over the entire training dataset." },
+    "model_arch.hyperparameters.early_stopping_patience": { "title": "Early Stopping Patience", "content": "The number of epochs to wait for an improvement in validation loss before stopping the training early. Set to 0 to disable." },
+    "model_arch.input_constraints.input_channels": { "title": "Input Channels", "content": "A read-only display showing the number of channels required by the selected model backbone." },
+    "model_arch.input_constraints.target_resolution": { "title": "Target Resolution", "content": "A read-only display showing the target image resolution required by the selected model backbone." },
+    "pred_target.regression.return_calculation": { "title": "Return Calculation Method", "content": "Defines how the percentage return for a regression label is calculated." },
+    "pred_target.regression.label_scaling": { "title": "Label Scaling", "content": "How the final return value is scaled before being fed to the model." },
+    "pred_target.classification.class_logic": { "title": "Class Logic", "content": "Defines the categories for classification tasks." },
+    "pred_target.classification.buy_threshold": { "title": "Buy Threshold (%)", "content": "The minimum positive return required to be classified as a 'Buy' signal." },
+    "pred_target.classification.sell_threshold": { "title": "Sell Threshold (%)", "content": "The maximum negative return required to be classified as a 'Sell' signal. Values between the buy and sell thresholds are 'Hold'." },
+    "pred_target.rally_time.target_magnitude": { "title": "Target Magnitude (%)", "content": "The percentage price increase the model should predict the time to." },
+    "pred_target.rally_time.max_horizon": { "title": "Max Horizon (candles)", "content": "The maximum number of future candles to search for the target magnitude. If not found, the label is capped at this value." },
+    "pred_target.frame_of_reference.target_frame": { "title": "Target Frame of Reference", "content": "Determines if the prediction target is an absolute value or relative to the sample's local context (for Dynamic Plane charts)." },
+    "error_correction.standard.loss_function": { "title": "Loss Function", "content": "The function used to measure the error between the model's prediction and the true label." },
+    "error_correction.standard.patience": { "title": "Early Stopping Patience", "content": "The number of epochs to wait for an improvement in validation loss before stopping the training early." },
+    "error_correction.dynamic_plane.drift_threshold": { "title": "Drift Threshold", "content": "The error threshold at which the 'Freeze & Correct' rotation logic will trigger a correction." },
+    "error_correction.dynamic_plane.healing_decay_rate": { "title": "Healing Decay Rate", "content": "The rate at which the correction factor decays back to zero once the model's predictions become accurate again." },
+    "file_saving.model_save_path_input": { "title": "Model Save Path", "content": "The directory where the trained model checkpoints will be saved." },
+    "file_saving.model_save_path_browse_button": { "title": "Browse", "content": "Select a directory for saving models." },
+    "file_saving.training_data_path_input": { "title": "Training Data Path", "content": "The directory where the generated image tensors for the training set will be saved." },
+    "file_saving.training_data_path_browse_button": { "title": "Browse", "content": "Select a directory for saving training data." },
+    "file_saving.augmented_data_path_input": { "title": "Augmented Data Path", "content": "The directory where any augmented versions of the training data will be saved." },
+    "file_saving.augmented_data_path_browse_button": { "title": "Browse", "content": "Select a directory for saving augmented data." },
+    "run_output.experiment_name": { "title": "Experiment Name", "content": "The name for this training run. It is automatically generated from a hash of the parameters, but you can override it. This name will be used for saving artifacts." },
+    "run_output.revert_button": { "title": "Revert to ID", "content": "Revert the experiment name to the automatically generated ID." },
+    "run_output.output_metrics.loss_curve": { "title": "Output Loss Curve", "content": "Generate a plot showing training and validation loss over epochs." },
+    "run_output.output_metrics.accuracy_curve": { "title": "Output Accuracy Curve", "content": "Generate a plot showing prediction accuracy or correctness over epochs." },
+    "run_output.output_metrics.sharpe_ratio": { "title": "Calculate Sharpe Ratio", "content": "Calculate the Sharpe Ratio from a simulated backtest of the model's predictions." },
+    "run_output.output_metrics.alpha_beta": { "title": "Calculate Alpha & Beta", "content": "Calculate Alpha and Beta metrics against a benchmark." },
+    "run_output.output_metrics.cumulative_return": { "title": "Plot Cumulative Return", "content": "Generate a plot showing the equity curve of a simulated backtest." },
+    "run_output.output_metrics.max_drawdown": { "title": "Calculate Max Drawdown", "content": "Calculate the maximum peak-to-trough decline in portfolio value." },
+    "run_output.dynamic_plane_diagnostics.vector_deviation_log": { "title": "Log Vector Deviation", "content": "Output logs detailing the deviation of data points from the established basis vectors." },
+    "run_output.dynamic_plane_diagnostics.correction_factor_trace": { "title": "Trace Correction Factor", "content": "Generate a plot showing how the correction factor changes during training (for 'Freeze & Correct' logic)." },
+    "run_output.dynamic_plane_diagnostics.input_snapshots": { "title": "Save Input Snapshots", "content": "Save a sample of the generated 2D plane image tensors for manual inspection." },
+    "setup_tab.navigation_list": { "title": "Setup Steps", "content": "Navigate through the different stages of configuring a training experiment. A checkmark indicates a visited step." },
+    "setup_tab.back_button": { "title": "Back", "content": "Go to the previous step." },
+    "setup_tab.next_button": { "title": "Next", "content": "Go to the next step." },
+    "setup_tab.apply_button": { "title": "Apply Configuration", "content": "Validate and save the current experiment configuration to `build/last_applied_config.json`. This makes it the active configuration for the 'Monitor' tab." },
+    "setup_tab.apply_and_run_button": { "title": "Apply and Run", "content": "Apply the configuration and immediately switch to the 'Monitor' tab to start the training experiment." }
+}

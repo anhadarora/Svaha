@@ -29,6 +29,7 @@ class SetupTabWidget(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("setup_tab")
         self.is_fully_initialized = False
         self.visited_pages = set()
         self.steps = [
@@ -50,6 +51,7 @@ class SetupTabWidget(QWidget):
 
         # --- Sidebar ---
         self.nav_list = QListWidget()
+        self.nav_list.setObjectName("setup_tab.navigation_list")
         self.nav_list.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.nav_list.setFixedWidth(200)
         self.nav_list.setIconSize(QSize(16, 16))
@@ -73,7 +75,9 @@ class SetupTabWidget(QWidget):
         nav_button_layout = QHBoxLayout()
         nav_button_layout.addStretch()
         self.back_button = QPushButton("< Back")
+        self.back_button.setObjectName("setup_tab.back_button")
         self.next_button = QPushButton("Next >")
+        self.next_button.setObjectName("setup_tab.next_button")
         nav_button_layout.addWidget(self.back_button)
         nav_button_layout.addWidget(self.next_button)
         content_layout.addLayout(nav_button_layout)
@@ -85,7 +89,9 @@ class SetupTabWidget(QWidget):
         # --- Control Buttons ---
         control_button_layout = QHBoxLayout()
         self.apply_button = QPushButton("Apply")
+        self.apply_button.setObjectName("setup_tab.apply_button")
         self.apply_and_run_button = QPushButton("Apply and Run")
+        self.apply_and_run_button.setObjectName("setup_tab.apply_and_run_button")
         self.apply_and_run_button.setStyleSheet("""
             background-color: #0d6efd; 
             color: white; 
