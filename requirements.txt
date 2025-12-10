@@ -7,6 +7,9 @@ pyqtgraph
 pyside6
 pyside6_addons
 pyside6_essentials
+pytest
+pytest-json-report
+pytest-qt
 Requests
 scikit-learn
 tensorflow

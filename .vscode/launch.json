@@ -12,6 +12,14 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "python": "${workspaceFolder}/venv/bin/python"
+        },
+        {
+            "name": "Run Fuzz Loop (Phoenix)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/run_fuzz_loop.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

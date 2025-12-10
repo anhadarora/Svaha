@@ -105,6 +105,7 @@ class DataSourceWidget(QWidget):
         main_form_layout.addWidget(master_date_group)
 
         validation_group = QGroupBox("Validation Method")
+        validation_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         validation_layout = QVBoxLayout(validation_group)
         self.split_method_combo = QComboBox()
         self.split_method_combo.addItems(["Date Range", "Percentage Split", "Time-Series K-Fold"])

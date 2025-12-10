@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QHBoxLayout,
     QFileDialog,
+    QSizePolicy,
 )
 from PySide6.QtCore import Signal
 import os
@@ -20,6 +21,7 @@ class FileSavingWidget(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         group = QGroupBox("File Saving Parameters")
+        group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         self.layout.addWidget(group)
 
         layout = QVBoxLayout(group)

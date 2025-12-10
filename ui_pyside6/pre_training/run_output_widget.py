@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QHBoxLayout,
+    QSizePolicy,
 )
 from PySide6.QtCore import Signal
 import json
@@ -30,14 +31,18 @@ class RunOutputWidget(QWidget):
 
         layout = QVBoxLayout(group)
 
-        layout.addWidget(QLabel("Experiment Name:"))
+        exp_name_group = QGroupBox("Experiment Name")
+        exp_name_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+        exp_name_layout = QVBoxLayout(exp_name_group)
+        
         name_layout = QHBoxLayout()
         self.experiment_name = QLineEdit()
         name_layout.addWidget(self.experiment_name)
         self.revert_button = QPushButton("Revert to ID")
         self.revert_button.setVisible(False)
         name_layout.addWidget(self.revert_button)
-        layout.addLayout(name_layout)
+        exp_name_layout.addLayout(name_layout)
+        layout.addWidget(exp_name_group)
 
         metrics_group = QGroupBox("Output Metrics")
         metrics_layout = QVBoxLayout(metrics_group)
@@ -47,6 +52,7 @@ class RunOutputWidget(QWidget):
         self.accuracy_curve_check = self._add_checkbox(metrics_layout, "Accuracy Curve")
         
         financial_group = QGroupBox("Financial Metrics")
+        financial_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         financial_layout = QVBoxLayout(financial_group)
         self.sharpe_ratio_check = self._add_checkbox(financial_layout, "Sharpe Ratio")
         self.alpha_beta_check = self._add_checkbox(financial_layout, "Alpha & Beta")
@@ -55,6 +61,7 @@ class RunOutputWidget(QWidget):
         metrics_layout.addWidget(financial_group)
 
         self.dyn_plane_group = QGroupBox("Dynamic Plane Diagnostics")
+        self.dyn_plane_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         dyn_plane_layout = QVBoxLayout(self.dyn_plane_group)
         self.vector_dev_log_check = self._add_checkbox(dyn_plane_layout, "Vector Deviation Log")
         self.correction_factor_trace_check = self._add_checkbox(dyn_plane_layout, "Correction Factor Trace")

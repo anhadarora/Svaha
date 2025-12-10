@@ -33,18 +33,57 @@ class ResultsTabWidget(QWidget):
         scroll_area.setWidget(container)
         main_grid = QGridLayout(container)
 
-        # Top Row: Summary and Parameters
-        main_grid.addWidget(ExperimentSummaryWidget(), 0, 0, 1, 2)
-        main_grid.addWidget(ParameterConfigurationWidget(), 0, 2, 1, 2)
+        # --- Instantiate Widgets ---
+        self.summary_widget = ExperimentSummaryWidget()
+        self.params_widget = ParameterConfigurationWidget()
+        self.kpi_widget = KpiWidget()
+        self.trades_widget = TradeStatisticsWidget()
+        self.loss_plot = LossVsEpochPlotWidget()
+        self.correctness_plot = CorrectnessVsEpochPlotWidget()
+        self.equity_curve_plot = EquityCurvePlotWidget()
+        self.correction_factor_plot = CorrectionFactorHistoryPlotWidget()
+        self.error_hist_plot = ErrorComponentHistogramWidget()
+        self.frame_shift_hist_plot = FrameShiftStabilityHistogramWidget()
 
-        # Second Row: KPIs and Trade Statistics
-        main_grid.addWidget(KpiWidget(), 1, 0, 1, 2)
-        main_grid.addWidget(TradeStatisticsWidget(), 1, 2, 1, 2)
+        self.all_widgets = [
+            self.summary_widget, self.params_widget, self.kpi_widget,
+            self.trades_widget, self.loss_plot, self.correctness_plot,
+            self.equity_curve_plot, self.correction_factor_plot,
+            self.error_hist_plot, self.frame_shift_hist_plot
+        ]
 
-        # Plot Grid
-        main_grid.addWidget(LossVsEpochPlotWidget(), 2, 0)
-        main_grid.addWidget(CorrectnessVsEpochPlotWidget(), 2, 1)
-        main_grid.addWidget(EquityCurvePlotWidget(), 2, 2)
-        main_grid.addWidget(CorrectionFactorHistoryPlotWidget(), 3, 0)
-        main_grid.addWidget(ErrorComponentHistogramWidget(), 3, 1)
-        main_grid.addWidget(FrameShiftStabilityHistogramWidget(), 3, 2)
+        # --- Layout Widgets ---
+        main_grid.addWidget(self.summary_widget, 0, 0, 1, 2)
+        main_grid.addWidget(self.params_widget, 0, 2, 1, 2)
+        main_grid.addWidget(self.kpi_widget, 1, 0, 1, 2)
+        main_grid.addWidget(self.trades_widget, 1, 2, 1, 2)
+        main_grid.addWidget(self.loss_plot, 2, 0)
+        main_grid.addWidget(self.correctness_plot, 2, 1)
+        main_grid.addWidget(self.equity_curve_plot, 2, 2)
+        main_grid.addWidget(self.correction_factor_plot, 3, 0)
+        main_grid.addWidget(self.error_hist_plot, 3, 1)
+        main_grid.addWidget(self.frame_shift_hist_plot, 3, 2)
+
+    def load_results(self, summary_data: dict):
+        """
+        Public slot to receive the final results dictionary and populate all child widgets.
+        """
+        if not summary_data:
+            print("Results tab received empty summary data.")
+            return
+
+        # Pass the relevant slice of data to each widget
+        self.summary_widget.update_data(summary_data.get("experiment_summary", {}))
+        self.params_widget.update_data(summary_data.get("parameter_configuration", {}))
+        self.kpi_widget.update_data(summary_data.get("kpis", {}))
+        self.trades_widget.update_data(summary_data.get("trade_statistics", {}))
+        
+        # Pass the full plot data to all plot widgets
+        plot_data = summary_data.get("plot_data", {})
+        if plot_data:
+            self.loss_plot.update_data(plot_data)
+            self.correctness_plot.update_data(plot_data)
+            self.equity_curve_plot.update_data(plot_data)
+            self.correction_factor_plot.update_data(plot_data)
+            self.error_hist_plot.update_data(plot_data)
+            self.frame_shift_hist_plot.update_data(plot_data)

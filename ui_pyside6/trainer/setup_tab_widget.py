@@ -85,7 +85,7 @@ class SetupTabWidget(QWidget):
         # --- Control Buttons ---
         control_button_layout = QHBoxLayout()
         self.apply_button = QPushButton("Apply")
-        self.apply_and_run_button = QPushButton("Apply & Run")
+        self.apply_and_run_button = QPushButton("Apply and Run")
         self.apply_and_run_button.setStyleSheet("""
             background-color: #0d6efd; 
             color: white; 
@@ -133,6 +133,8 @@ class SetupTabWidget(QWidget):
             self.model_input_parameters_widget.input_window_size_n_spinbox.value()
         )
         self.model_architecture_widget._emit_prediction_heads_changed()
+        self.model_input_parameters_widget._update_per_sample_estimate()
+        self.model_input_parameters_widget.invalidate_total_estimate()
 
         self.nav_list.setCurrentRow(0)
         self._update_nav_buttons(0)
@@ -171,6 +173,10 @@ class SetupTabWidget(QWidget):
                 widget.configuration_changed.connect(
                     self._on_parameter_changed, Qt.QueuedConnection
                 )
+                # Also invalidate the total size estimate on any change
+                widget.configuration_changed.connect(
+                    self.model_input_parameters_widget.invalidate_total_estimate
+                )
 
         # Inter-widget communication
         self.model_input_parameters_widget.resolution_changed.connect(
@@ -184,6 +190,9 @@ class SetupTabWidget(QWidget):
         )
         self.model_architecture_widget.prediction_heads_changed.connect(
             self.prediction_target_widget.update_visibility
+        )
+        self.model_input_parameters_widget.calculate_total_size_requested.connect(
+            self._on_calculate_total_size_requested
         )
 
         self.apply_button.clicked.connect(self._on_apply)
@@ -236,6 +245,24 @@ class SetupTabWidget(QWidget):
         is_dynamic = chart_type_text == "Dynamic 2D Plane"
         self.run_output_widget.set_dynamic_plane_diagnostics_visibility(is_dynamic)
         self.prediction_target_widget.set_frame_reference_visibility(is_dynamic)
+        self.error_correction_widget.set_dynamic_plane_mode(is_dynamic)
+
+    def _on_calculate_total_size_requested(self):
+        # This is where the heavy calculation will be triggered.
+        # For now, we'll simulate it to confirm the UI works.
+        self.model_input_parameters_widget.set_total_size_estimate("", "", "calculating")
+
+        # In a real implementation, a worker thread would be started here.
+        # We use a QTimer to simulate a delay.
+        def _fake_calculation_done():
+            # This would be called by the worker thread's finished signal.
+            dummy_size = 5.4 
+            dummy_files = 12345
+            self.model_input_parameters_widget.set_total_size_estimate(
+                f"~ {dummy_size:.2f} GB", f"{dummy_files:,} files", "done"
+            )
+
+        QTimer.singleShot(2000, _fake_calculation_done) # Simulate 2-second calculation
 
     def get_configuration(self):
         config = {}

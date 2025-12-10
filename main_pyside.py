@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # Load and apply stylesheet
     try:
-        with open("ui_pyside6/dark_theme.qss", "r") as f:
+        with open("ui_pyside6/theme.qss", "r") as f:
             app.setStyleSheet(f.read())
     except FileNotFoundError:
         print("Stylesheet not found, using default styles.")

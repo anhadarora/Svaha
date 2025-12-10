@@ -15,12 +15,18 @@ class ExperimentSummaryWidget(QWidget):
         self.experiment_name = QLabel("N/A")
         form_layout.addRow("Experiment Name:", self.experiment_name)
 
-        self.final_status = QLabel("N/A")
-        form_layout.addRow("Final Status:", self.final_status)
+        self.completed_on = QLabel("N/A")
+        form_layout.addRow("Completed On:", self.completed_on)
 
-        self.total_training_time = QLabel("N/A")
-        form_layout.addRow("Total Training Time:", self.total_training_time)
+        self.total_epochs = QLabel("N/A")
+        form_layout.addRow("Total Epochs:", self.total_epochs)
 
-        self.best_model_checkpoint = QLabel("N/A")
-        self.best_model_checkpoint.setOpenExternalLinks(True)
-        form_layout.addRow("Best Model Checkpoint:", self.best_model_checkpoint)
+        self.best_val_loss = QLabel("N/A")
+        form_layout.addRow("Best Validation Loss:", self.best_val_loss)
+
+    def update_data(self, data: dict):
+        """Populates the summary fields with data from the completed run."""
+        self.experiment_name.setText(data.get("Experiment Name", "N/A"))
+        self.completed_on.setText(data.get("Completed On", "N/A"))
+        self.total_epochs.setText(str(data.get("Total Epochs", "N/A")))
+        self.best_val_loss.setText(str(data.get("Best Validation Loss", "N/A")))

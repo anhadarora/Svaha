@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QSizePolicy,
     QSpinBox,
+    QDoubleSpinBox,
     QHBoxLayout,
     QPushButton,
     QColorDialog,
@@ -21,6 +22,7 @@ class ModelInputParametersWidget(QWidget):
     configuration_changed = Signal()
     resolution_changed = Signal(str)
     window_size_changed = Signal(int)
+    calculate_total_size_requested = Signal()
 
     def __init__(self):
         super().__init__()
@@ -81,6 +83,28 @@ class ModelInputParametersWidget(QWidget):
         self.dynamic_plane_widget = self._create_dynamic_plane_widget()
         self.settings_stack.addWidget(self.dynamic_plane_widget)
 
+        # --- Disk Space Estimation ---
+        estimation_group = QGroupBox("Disk Space Estimation")
+        layout.addWidget(estimation_group)
+        estimation_layout = QGridLayout(estimation_group)
+
+        self.per_sample_size_label = QLabel("Calculating...")
+        self._add_grid_row(estimation_layout, 0, "Approx. Size per Sample:", self.per_sample_size_label)
+
+        self.total_size_label = QLabel("N/A")
+        self.total_files_label = QLabel("N/A")
+        self.calculate_total_size_button = QPushButton("Calculate Total")
+        estimation_layout.addWidget(QLabel("Estimated Total:"), 1, 0)
+        estimation_layout.addWidget(self.total_size_label, 1, 1)
+        estimation_layout.addWidget(self.total_files_label, 1, 2)
+        estimation_layout.addWidget(self.calculate_total_size_button, 1, 3)
+
+
+        self.estimate_expired_label = QLabel("(Estimate outdated, please recalculate)")
+        self.estimate_expired_label.setStyleSheet("color: #ffc107;") # Amber color
+        self.estimate_expired_label.setVisible(False)
+        estimation_layout.addWidget(self.estimate_expired_label, 2, 1, 1, 3)
+
         layout.addStretch()
 
     def _add_grid_row(self, layout, row, label_text, widget, tooltip=None, column=0):
@@ -98,18 +122,14 @@ class ModelInputParametersWidget(QWidget):
         return spinbox
 
     def connect_signals(self):
+        # Config changes
         self.resampling_factor_spinbox.valueChanged.connect(self.configuration_changed)
         self.input_window_size_n_spinbox.valueChanged.connect(self.configuration_changed)
-        self.input_window_size_n_spinbox.valueChanged.connect(self.window_size_changed)
         self.prediction_horizon_k_spinbox.valueChanged.connect(self.configuration_changed)
         self.chart_type_combo.currentTextChanged.connect(self.configuration_changed)
         self.channel_depth_combo.currentIndexChanged.connect(self.configuration_changed)
-        
         self.target_height_spinbox.valueChanged.connect(self.configuration_changed)
         self.target_width_spinbox.valueChanged.connect(self.configuration_changed)
-        self.target_height_spinbox.valueChanged.connect(self._emit_resolution)
-        self.target_width_spinbox.valueChanged.connect(self._emit_resolution)
-
         self.bar_width_px_spinbox.valueChanged.connect(self.configuration_changed)
         self.border_thickness_px_spinbox.valueChanged.connect(self.configuration_changed)
         self.line_width_px_spinbox.valueChanged.connect(self.configuration_changed)
@@ -117,15 +137,26 @@ class ModelInputParametersWidget(QWidget):
         self.volume_display_combo.currentIndexChanged.connect(self.configuration_changed)
         self.ma_checkbox.toggled.connect(self.configuration_changed)
         self.ma_period_spinbox.valueChanged.connect(self.configuration_changed)
-        
         self.time_basis_check.toggled.connect(self.configuration_changed)
         self.price_basis_check.toggled.connect(self.configuration_changed)
         self.volume_basis_check.toggled.connect(self.configuration_changed)
         self.norm_strategy_combo.currentIndexChanged.connect(self.configuration_changed)
         self.rotation_logic_combo.currentIndexChanged.connect(self.configuration_changed)
         self.drift_error_check.toggled.connect(self.configuration_changed)
-        
+        self.reference_point_strategy.currentIndexChanged.connect(self.configuration_changed)
+        self.outlier_clip_percentile.valueChanged.connect(self.configuration_changed)
+
+        # Inter-widget communication
+        self.input_window_size_n_spinbox.valueChanged.connect(self.window_size_changed)
+        self.target_height_spinbox.valueChanged.connect(self._emit_resolution)
+        self.target_width_spinbox.valueChanged.connect(self._emit_resolution)
         self.chart_type_combo.currentTextChanged.connect(self._on_chart_type_changed)
+
+        # Disk space estimation
+        self.target_height_spinbox.valueChanged.connect(self._update_per_sample_estimate)
+        self.target_width_spinbox.valueChanged.connect(self._update_per_sample_estimate)
+        self.channel_depth_combo.currentIndexChanged.connect(self._update_per_sample_estimate)
+        self.calculate_total_size_button.clicked.connect(self.calculate_total_size_requested)
 
     def get_parameters(self):
         params = {
@@ -145,6 +176,8 @@ class ModelInputParametersWidget(QWidget):
                 "normalization_strategy": self.norm_strategy_combo.currentText(),
                 "rotation_logic": self.rotation_logic_combo.currentText(),
                 "include_drift_error": self.drift_error_check.isChecked(),
+                "reference_point_strategy": self.reference_point_strategy.currentText(),
+                "outlier_clip_percentile": self.outlier_clip_percentile.value(),
             }
         else:
             params["style_settings"] = {
@@ -177,13 +210,13 @@ class ModelInputParametersWidget(QWidget):
             self.settings_stack.setCurrentWidget(self.dynamic_plane_widget)
         else:
             self.settings_stack.setCurrentWidget(self.style_settings_widget)
+        self._update_per_sample_estimate()
 
     def _create_style_settings_widget(self):
         container = QWidget()
         layout = QVBoxLayout(container)
         layout.setSpacing(15)
 
-        # --- Resolution & Sizing ---
         res_group = QGroupBox("Resolution & Sizing")
         layout.addWidget(res_group)
         res_layout = QGridLayout(res_group)
@@ -203,7 +236,6 @@ class ModelInputParametersWidget(QWidget):
         self.line_width_px_spinbox = self._create_spinbox(1, 10, 2)
         self._add_grid_row(res_layout, 2, "Line Width (px):", self.line_width_px_spinbox, column=2)
 
-        # --- Color & Display ---
         display_group = QGroupBox("Color & Display")
         layout.addWidget(display_group)
         display_layout = QGridLayout(display_group)
@@ -236,7 +268,6 @@ class ModelInputParametersWidget(QWidget):
         self.volume_display_combo.addItems(["None", "Overlay", "Bottom Subplot", "Color-Coded"])
         self._add_grid_row(display_layout, 2, "Volume Display:", self.volume_display_combo)
 
-        # --- Overlays ---
         overlays_group = QGroupBox("Technical Overlays")
         layout.addWidget(overlays_group)
         overlays_layout = QGridLayout(overlays_group)
@@ -253,8 +284,10 @@ class ModelInputParametersWidget(QWidget):
     def _create_dynamic_plane_widget(self):
         container = QGroupBox("Dynamic Plane Configuration")
         layout = QGridLayout(container)
+        layout.setSpacing(15)
         
         basis_group = QGroupBox("Basis Vectors")
+        basis_group.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         basis_layout = QHBoxLayout(basis_group)
         self.time_basis_check = QCheckBox("Time")
         self.price_basis_check = QCheckBox("Price")
@@ -274,8 +307,18 @@ class ModelInputParametersWidget(QWidget):
         self.rotation_logic_combo.addItems(["Dynamic", "Freeze & Correct"])
         self._add_grid_row(layout, 2, "Rotation Logic:", self.rotation_logic_combo)
         
+        self.reference_point_strategy = QComboBox()
+        self.reference_point_strategy.addItems(['Previous Close', 'Window Mean', 'EMA Trend'])
+        self._add_grid_row(layout, 3, "Reference Point Strategy:", self.reference_point_strategy)
+
+        self.outlier_clip_percentile = QDoubleSpinBox()
+        self.outlier_clip_percentile.setRange(90.0, 100.0)
+        self.outlier_clip_percentile.setValue(99.0)
+        self.outlier_clip_percentile.setSingleStep(0.1)
+        self._add_grid_row(layout, 4, "Outlier Clip Percentile:", self.outlier_clip_percentile)
+
         self.drift_error_check = QCheckBox("Include Frame Drift Error")
-        layout.addWidget(self.drift_error_check, 3, 0, 1, 2)
+        layout.addWidget(self.drift_error_check, 5, 0, 1, 2)
 
         return container
 
@@ -290,14 +333,64 @@ class ModelInputParametersWidget(QWidget):
     def _update_button_style(self, button, color, is_bg=False):
         text_color = "black" if (color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114) > 186 else "white"
         if is_bg:
-            text_color = "white" # Keep text white for background color button
+            text_color = "white"
         style = f"background-color: {color.name()}; color: {text_color};"
         button.setStyleSheet(style)
-    
-    def _add_grid_row(self, layout, row, label_text, widget, tooltip=None, column=0):
-        label = QLabel(label_text)
-        label.setBuddy(widget)
-        if tooltip:
-            widget.setToolTip(tooltip)
-        layout.addWidget(label, row, column)
-        layout.addWidget(widget, row, column + 1)
+
+    def _update_per_sample_estimate(self):
+        """Calculates and displays the uncompressed size of a single sample."""
+        h = self.target_height_spinbox.value()
+        w = self.target_width_spinbox.value()
+        
+        channels_text = self.channel_depth_combo.currentText()
+        if "Grayscale" in channels_text:
+            c = 1
+        elif "RGB + Delta" in channels_text:
+            c = 4 # Assuming RGB + 1 delta channel
+        else: # RGB
+            c = 3
+            
+        total_bytes = h * w * c
+        
+        if total_bytes < 1024:
+            size_str = f"{total_bytes} B"
+        elif total_bytes < 1024**2:
+            size_str = f"{total_bytes/1024:.1f} KB"
+        else:
+            size_str = f"{total_bytes/(1024**2):.1f} MB"
+            
+        self.per_sample_size_label.setText(f"{size_str} (uncompressed)")
+        self.invalidate_total_estimate()
+
+    def invalidate_total_estimate(self):
+        """Resets the total size estimate, indicating it's outdated."""
+        self.total_size_label.setText("N/A")
+        self.total_files_label.setText("N/A")
+        self.estimate_expired_label.setVisible(True)
+        self.calculate_total_size_button.setEnabled(True)
+        self.total_size_label.setStyleSheet("color: #999;")
+        self.total_files_label.setStyleSheet("color: #999;")
+
+    def set_total_size_estimate(self, size_str: str, file_count_str: str, status: str):
+        """Public slot to update the total size estimate from the parent."""
+        if status == "calculating":
+            self.total_size_label.setText("Calculating...")
+            self.total_files_label.setText("...")
+            self.total_size_label.setStyleSheet("")
+            self.total_files_label.setStyleSheet("")
+            self.estimate_expired_label.setVisible(False)
+            self.calculate_total_size_button.setEnabled(False)
+        elif status == "done":
+            self.total_size_label.setText(size_str)
+            self.total_files_label.setText(file_count_str)
+            self.total_size_label.setStyleSheet("color: #f0f0f0; font-weight: bold;")
+            self.total_files_label.setStyleSheet("color: #f0f0f0; font-weight: bold;")
+            self.estimate_expired_label.setVisible(False)
+            self.calculate_total_size_button.setEnabled(True)
+        else: # Error or invalid
+            self.total_size_label.setText("Error")
+            self.total_files_label.setText("Error")
+            self.total_size_label.setStyleSheet("color: #ef5350;")
+            self.total_files_label.setStyleSheet("color: #ef5350;")
+            self.estimate_expired_label.setVisible(False)
+            self.calculate_total_size_button.setEnabled(True)

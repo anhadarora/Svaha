@@ -1,48 +1,123 @@
-/* General Styles */
+/* 
+    Professional Dark Mode Theme for Svaha Trading Terminal
+    Palette:
+    - Main Background: #121212
+    - Card/Panel Background: #1e1e1e
+    - Text (Primary): #e0e0e0
+    - Text (Labels): #a0a0a0
+    - Accent: #0d6efd
+    - Borders: #333333
+*/
+
+/* --- General --- */
 QWidget {
-    font-family: "Segoe UI", "Arial", sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
     font-size: 14px;
-    color: #333;
 }
 
-/* GroupBox */
+/* --- Labels --- */
+QLabel {
+    color: #a0a0a0;
+    background-color: transparent;
+    padding: 2px;
+}
+
+/* --- GroupBox (Cards/Panels) --- */
 QGroupBox {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 5px;
-    margin-top: 10px;
-    padding: 10px;
+    background-color: #1e1e1e;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    margin-top: 15px; /* Provides space for the title */
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 0 5px;
-}
-
-/* Labels and LineEdits */
-QLabel {
+    padding: 0 5px 5px 5px;
+    left: 10px;
+    color: #a0a0a0;
     font-weight: bold;
+    background-color: #1e1e1e;
 }
 
-QLineEdit, QComboBox, QDateEdit {
-    border: 1px solid #ced4da;
+/* --- Input Widgets --- */
+QLineEdit, QComboBox, QSpinBox, QDateEdit {
+    background-color: #2d2d2d;
+    border: 1px solid #333333;
     border-radius: 4px;
-    padding: 5px;
-    background-color: #fff;
+    padding: 6px;
+    color: #e0e0e0;
 }
 
-QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
-    border-color: #80bdff;
-}
-
-/* Buttons */
-QPushButton {
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateEdit:focus {
     border: 1px solid #0d6efd;
-    border-radius: 5px;
-    padding: 5px 10px;
+}
+
+QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDateEdit:disabled {
+    background-color: #252525;
+    color: #777777;
+}
+
+/* --- ComboBox Specifics --- */
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid #333333;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox::down-arrow {
+    /* A base64 encoded white down-arrow SVG */
+    image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2d2d2d;
+    border: 1px solid #0d6efd;
+    selection-background-color: #0d6efd;
+    selection-color: #ffffff;
+    color: #e0e0e0;
+    padding: 4px;
+}
+
+/* --- List Widget (for Sidebar) --- */
+QListWidget {
+    background-color: #181818;
+    border: none;
+}
+
+QListWidget::item {
+    padding: 12px;
+    color: #a0a0a0;
+    border: none; /* Clean look */
+}
+
+QListWidget::item:hover {
+    background-color: #252525;
+}
+
+QListWidget::item:selected {
+    background-color: #0d6efd;
+    color: #ffffff;
+    font-weight: bold;
+    border-left: 3px solid #ffffff; /* Selection indicator */
+    padding-left: 9px;
+}
+
+/* --- Push Button --- */
+QPushButton {
     background-color: #0d6efd;
     color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: bold;
 }
 
 QPushButton:hover {
@@ -53,30 +128,79 @@ QPushButton:pressed {
     background-color: #0a58ca;
 }
 
-/* CheckBox and Slider */
-QCheckBox::indicator {
-    width: 16px;
-    height: 16px;
+QPushButton:disabled {
+    background-color: #2d2d2d;
+    color: #777777;
 }
 
-QSlider::groove:horizontal {
-    border: 1px solid #bbb;
-    background: white;
-    height: 8px;
-    border-radius: 4px;
+/* --- Scroll Area & Scroll Bars --- */
+QScrollArea {
+    border: none;
+    background-color: transparent;
 }
 
-QSlider::handle:horizontal {
-    background: #0d6efd;
-    border: 1px solid #0d6efd;
-    width: 18px;
-    margin: -2px 0;
-    border-radius: 9px;
+QScrollBar:vertical {
+    border: none;
+    background: #1e1e1e;
+    width: 10px;
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+    background: #444444;
+    min-height: 20px;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #555555;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
 }
 
-/* ListWidget */
-QListWidget {
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    background-color: #fff;
+QScrollBar:horizontal {
+    border: none;
+    background: #1e1e1e;
+    height: 10px;
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:horizontal {
+    background: #444444;
+    min-width: 20px;
+    border-radius: 5px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #555555;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* --- Other Widgets for Cohesion --- */
+QStackedWidget {
+    background-color: transparent;
+}
+
+QTabWidget::pane {
+    border: 1px solid #333333;
+    background-color: #1e1e1e;
+}
+
+QTabBar::tab {
+    background: #1e1e1e;
+    color: #a0a0a0;
+    padding: 8px 12px;
+    border: 1px solid #333333;
+    border-bottom: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background: #2d2d2d;
+    color: #e0e0e0;
+    border-bottom: 1px solid #2d2d2d;
+}
+
+QTabBar::tab:hover {
+    background: #252525;
 }
