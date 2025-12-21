@@ -45,12 +45,14 @@ class UserScreen(QWidget):
 
         self.init_ui()
 
-        self.try_auto_login()
-
     def login_with_kite(self, *args):
         self.login_label.setText("Status: Logging in...")
         auth_thread = threading.Thread(target=self.run_auth_flow)
         auth_thread.start()
+
+    def logout(self):
+        if self.kite_api.logout():
+            self.update_status("Successfully logged out.", False)
 
     def init_ui(self):
         layout = QVBoxLayout(self)
@@ -81,13 +83,12 @@ class UserScreen(QWidget):
         self.data_layout = QVBoxLayout()
         content_layout.addLayout(self.data_layout)
 
-        # Funds Card (placeholder)
+        # Funds Card
         self.funds_card = QGroupBox("Funds")
         funds_layout = QVBoxLayout(self.funds_card)
         self.funds_label = QLabel("Available: ₹...")
         funds_layout.addWidget(self.funds_label)
         self.data_layout.addWidget(self.funds_card)
-        self.funds_card.hide()  # Initially hidden
 
         # Tabs for Positions and Holdings
         self.tab_widget = QTabWidget()
@@ -96,7 +97,6 @@ class UserScreen(QWidget):
         self.tab_widget.addTab(self.positions_tab, "Positions")
         self.tab_widget.addTab(self.holdings_tab, "Holdings")
         self.data_layout.addWidget(self.tab_widget)
-        self.tab_widget.hide()  # Initially hidden
 
         # Positions Table
         positions_layout = QVBoxLayout(self.positions_tab)
@@ -107,14 +107,21 @@ class UserScreen(QWidget):
         holdings_layout = QVBoxLayout(self.holdings_tab)
         self.holdings_table = QTableView()
         holdings_layout.addWidget(self.holdings_table)
+        
+        # Logout Button
+        self.logout_button = QPushButton("Logout")
+        self.logout_button.clicked.connect(self.logout)
+        self.data_layout.addWidget(self.logout_button)
+
+        # Set initial visibility
+        self.funds_card.hide()
+        self.tab_widget.hide()
+        self.logout_button.hide()
 
     def go_back(self):
         self.back_requested.emit()
 
-    def go_back(self):
-        self.back_requested.emit()
-
-    def try_auto_login(self):
+    def check_session_and_update_ui(self):
         if self.kite_api.is_session_valid():
             margins = self.session_manager.get_kite().margins()
             positions = self.session_manager.get_kite().positions()
@@ -122,6 +129,8 @@ class UserScreen(QWidget):
             self.comm.update_status_signal.emit(
                 "Logged in from saved session", True, margins, positions, holdings
             )
+        else:
+            self.update_status("Please login to continue", False)
 
     def run_auth_flow(self):
         auth_server = AuthServer()
@@ -152,10 +161,15 @@ class UserScreen(QWidget):
             self.login_card.hide()
             self.funds_card.show()
             self.tab_widget.show()
+            self.logout_button.show()
             self.update_dashboard(margins, positions, holdings)
             self.comm.logged_in_signal.emit(True)
         else:
             self.login_label.setText(message)
+            self.login_card.show()
+            self.funds_card.hide()
+            self.tab_widget.hide()
+            self.logout_button.hide()
             self.comm.logged_in_signal.emit(False)
 
     def update_dashboard(self, margins, positions, holdings):
@@ -189,6 +203,11 @@ class UserScreen(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    user_screen = UserScreen()
+    # This is a dummy implementation for standalone running
+    from api.kite.client import KiteAPI
+    from ui_pyside6.session_manager import SessionManager
+    kite_api_instance = KiteAPI()
+    session_manager_instance = SessionManager(kite_api_instance)
+    user_screen = UserScreen(session_manager_instance, kite_api_instance)
     user_screen.show()
     sys.exit(app.exec())

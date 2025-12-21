@@ -2,37 +2,40 @@ import time
 import random
 import json
 import os
+from unittest.mock import patch
+from PySide6.QtCore import Qt
 
-from tests.ui_fuzzer import WizardWalker
+from tests.ui_fuzzer import TrainerWalker
 
-def test_fuzz_wizard_completion(main_window, qtbot):
+def test_trainer_scenarios(main_window, qtbot):
     """
-    Tests the SetupTabWidget wizard by running an automated 'monkey test'.
-
-    - Sets a random seed for reproducibility.
-    - Uses WizardWalker to interact with the UI.
-    - Logs all actions to a JSON file.
-    - Fails if the wizard gets stuck before reaching the last page.
+    Tests the TrainerScreen setup wizard by running a series of automated scenarios.
+    This test runs the REAL TrainingWorker to verify the end-to-end process.
     """
     # Ensure the Trainer screen is the active tab
-    main_window.tab_widget.setCurrentWidget(main_window.trainer_screen)
+    qtbot.mouseClick(main_window.btn_trainer, Qt.LeftButton)
     qtbot.wait(100) # Allow time for the tab to become visible
 
-    # 1. Seeding
     seed_value = time.time()
     random.seed(seed_value)
     print(f"Fuzz test running with seed: {seed_value}")
 
-    # 2. Execution
-    walker = WizardWalker(main_window, qtbot)
+    # Wait for any initial data loading
+    qtbot.wait(500) 
+
+    # --- Execution ---
+    walker = TrainerWalker(main_window, qtbot)
     walker.history.append(f"Seed for this run: {seed_value}")
 
     try:
-        walker.walk_wizard()
+        # We only patch QMessageBox.exec to prevent the success dialog 
+        # from blocking the test run. The TrainingWorker will be real.
+        with patch('PySide6.QtWidgets.QMessageBox.exec', return_value=None):
+            walker.run_scenarios()
     
     finally:
-        # 3. Reporting
-        report_path = os.path.abspath("./fuzz_history.json")
+        # --- Reporting ---
+        report_path = os.path.abspath("./fuzz_history_trainer.json")
         print(f"Writing fuzz history to {report_path}")
         try:
             with open(report_path, "w") as f:
@@ -40,11 +43,7 @@ def test_fuzz_wizard_completion(main_window, qtbot):
         except Exception as e:
             print(f"Error writing fuzz history file: {e}")
 
-    # 4. Assertion
-    final_index = walker.setup_widget.stack.currentIndex()
-    last_page_index = walker.setup_widget.stack.count() - 1
-    
-    assert final_index == last_page_index, \
-        f"Wizard walk failed to complete. Stuck on page {final_index}/{last_page_index}. " \
-        f"Check fuzz_history.json with seed {seed_value} for details."
-
+    # --- Assertion ---
+    assert walker.all_scenarios_passed, \
+        f"One or more trainer fuzzing scenarios failed. " \
+        f"Check {os.path.basename(report_path)} with seed {seed_value} for details."

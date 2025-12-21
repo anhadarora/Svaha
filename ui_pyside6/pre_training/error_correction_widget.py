@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -32,6 +33,34 @@ class ErrorCorrectionWidget(QWidget):
         self.stack.addWidget(self.dynamic_plane_widget)
 
         self.layout.addStretch()
+
+    def get_parameters(self):
+        """Returns parameters based on the currently active UI."""
+        if self.stack.currentWidget() == self.standard_widget:
+            return {
+                "error_correction_mode": "standard",
+                "loss_function": self.loss_function_combo.currentText(),
+                "patience": self.patience_spinbox.value(),
+            }
+        else: # Dynamic Plane Widget
+            return {
+                "error_correction_mode": "dynamic_plane",
+                "drift_threshold": self.drift_threshold_spinbox.value(),
+                "healing_decay_rate": self.healing_decay_rate_spinbox.value(),
+            }
+
+    def set_parameters(self, params: dict):
+        mode = params.get("error_correction_mode", "standard")
+        if mode == "dynamic_plane":
+            self.stack.setCurrentWidget(self.dynamic_plane_widget)
+            self.drift_threshold_spinbox.setValue(params.get("drift_threshold", 0.05))
+            self.healing_decay_rate_spinbox.setValue(params.get("healing_decay_rate", 0.1))
+        else: # standard
+            self.stack.setCurrentWidget(self.standard_widget)
+            self.loss_function_combo.setCurrentText(params.get("loss_function", "Mean Squared Error (MSE)"))
+            self.patience_spinbox.setValue(params.get("patience", 10))
+        
+        self.configuration_changed.emit()
 
     def _create_standard_ui(self):
         container = QWidget()
@@ -108,18 +137,3 @@ class ErrorCorrectionWidget(QWidget):
         else:
             self.stack.setCurrentWidget(self.standard_widget)
         self.configuration_changed.emit()
-
-    def get_parameters(self):
-        """Returns parameters based on the currently active UI."""
-        if self.stack.currentWidget() == self.standard_widget:
-            return {
-                "error_correction_mode": "standard",
-                "loss_function": self.loss_function_combo.currentText(),
-                "patience": self.patience_spinbox.value(),
-            }
-        else: # Dynamic Plane Widget
-            return {
-                "error_correction_mode": "dynamic_plane",
-                "drift_threshold": self.drift_threshold_spinbox.value(),
-                "healing_decay_rate": self.healing_decay_rate_spinbox.value(),
-            }

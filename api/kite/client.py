@@ -86,6 +86,22 @@ class KiteAPI:
             print(f"Error loading session: {e}")
             return None
 
+    def logout(self):
+        """Logs out, clears the access token, and deletes the session file."""
+        try:
+            # Invalidate the token in the current instance
+            self.set_access_token(None)
+            
+            # Delete the session file from disk
+            if os.path.exists(SESSION_FILE):
+                os.remove(SESSION_FILE)
+                print("Session file deleted.")
+            
+            return True
+        except Exception as e:
+            print(f"An error occurred during logout: {e}")
+            return False
+
     def is_session_valid(self):
         print("Validating session...")
         if not self.access_token:

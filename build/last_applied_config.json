@@ -1,15 +1,15 @@
 {
     "interval": "All Intervals",
     "instruments": [
-        "AIAENG"
+        "RELIANCE"
     ],
-    "master_start_date": "2025-11-11",
-    "master_end_date": "2025-11-20",
+    "master_start_date": "2000-01-01",
+    "master_end_date": "2000-01-01",
     "validation_method": "Date Range",
-    "training_start_date": "2025-11-11",
-    "training_end_date": "2025-11-20",
-    "validation_start_date": "2025-11-11",
-    "validation_end_date": "2025-11-20",
+    "training_start_date": "2000-01-01",
+    "training_end_date": "2000-01-01",
+    "validation_start_date": "2000-01-01",
+    "validation_end_date": "2000-01-01",
     "resampling_factor": 1,
     "input_window_size": 5,
     "prediction_horizon": 1,
@@ -21,6 +21,10 @@
         "bar_width": 5,
         "border_thickness": 1,
         "line_width": 2,
+        "up_color": "#26a69a",
+        "down_color": "#ef5350",
+        "bg_color": "#2d2d2d",
+        "line_color": "#f0f0f0",
         "scaling_mode": "Local Min-Max",
         "volume_display": "None",
         "overlays": {
@@ -30,40 +34,47 @@
             }
         }
     },
-    "input_format": "Image Snapshot",
-    "model_type": "Vision Transformer (ViT)",
-    "enable_sequential_input": false,
-    "sequence_length": 2,
-    "sequence_handling_method": "Fixed Length",
-    "enable_delta_features": false,
-    "delta_method": "Feature Subtraction (Latent)",
-    "learning_rate": "0.001",
-    "batch_size": "32",
-    "epochs": "100",
-    "optimizer": "Adam",
-    "prediction_target_type": "Vectorial Movement (in Dynamic Plane)",
-    "vector_type": "Single-Step Vector (\u0394X', \u0394Y')",
-    "buy_threshold": "+1.0",
-    "sell_threshold": "-1.0",
-    "predict_rally_time": false,
-    "enable_dynamic_correction": false,
-    "gamma_1": 0.0,
-    "gamma_2": 0.0,
-    "alpha_1": 0.0,
-    "alpha_2": 0.0,
-    "beta_1": 0.0,
-    "beta_2": 0.0,
-    "error_buffer_size": "20",
-    "wound_threshold_multiplier": "2.5",
-    "correction_step": "0.1",
-    "max_correction_factor": "1.0",
-    "correctness_buffer_size": "20",
-    "prediction_accuracy_method": "Vector Cosine Similarity",
-    "healing_threshold": 0.0,
-    "healing_rate_function": "Proportional",
+    "backbone": {
+        "architecture": "ViT-Base-Patch16",
+        "pretrained": true,
+        "freeze": true
+    },
+    "sequence_modeling": {
+        "aggregator": "None (Channel Stack)"
+    },
+    "prediction_heads": {
+        "primary_output": "Scalar Regression (Return %)",
+        "auxiliary_heads": {
+            "rally_time": false,
+            "directional_confidence": false
+        },
+        "head_architecture": {
+            "hidden_units": 512,
+            "dropout": 0.2,
+            "activation": "ReLU"
+        }
+    },
+    "training": {
+        "learning_rate": "1e-3",
+        "optimizer": "Adam",
+        "loss_function": "MSE",
+        "batch_size": 32,
+        "max_epochs": 100,
+        "early_stopping_patience": 10
+    },
+    "input_constraints": {
+        "input_channels": 3
+    },
+    "regression_logic": {
+        "return_calculation": "Thesis (Next Open to Future Close)",
+        "label_scaling": "Percent"
+    },
+    "error_correction_mode": "standard",
+    "loss_function": "Mean Squared Error (MSE)",
+    "patience": 10,
     "model_save_path": "/Volumes/ProApps/Svaha---18-11-2025/mvp-codebase/build/models",
-    "training_data_path": "/Volumes/ProApps/Svaha---18-11-2025/mvp-codebase/build/models",
-    "augmented_data_path": "/Volumes/ProApps/Svaha---18-11-2025/mvp-codebase/build/data",
+    "training_data_path": "/Volumes/ProApps/Svaha---18-11-2025/mvp-codebase/build/data/training",
+    "augmented_data_path": "/Volumes/ProApps/Svaha---18-11-2025/mvp-codebase/build/data/augmented",
     "output_metrics": {
         "Loss Curve": true,
         "Accuracy Curve": true,
@@ -75,5 +86,5 @@
         "Correction Factor Trace": true,
         "Input Snapshots (Sample)": true
     },
-    "experiment_name": "4cbb7ad16feb"
+    "experiment_name": "4d9f5c7fc71c"
 }

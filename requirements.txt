@@ -13,5 +13,8 @@ pytest-json-report
 pytest-qt
 Requests
 scikit-learn
+stocktrends
 tensorflow
+vit-keras
 watchdog
+pyarrow

@@ -1,3 +1,4 @@
+
 import sys
 import os
 import json
@@ -31,10 +32,16 @@ class TrainerScreen(QWidget):
         self.tab_widget.addTab(self.results_tab, "Results")
         self.tab_widget.addTab(self.history_tab, "History")
 
+        self._connect_signals()
+
+    def _connect_signals(self):
         # Connect signals between tabs
         self.setup_tab.start_training_requested.connect(self._on_start_training_requested)
         self.monitor_tab.training_run_completed.connect(self._on_training_completed)
+        
+        # History related signals
         self.history_updated.connect(self.history_tab.load_history)
+        self.history_tab.configuration_reload_requested.connect(self._on_config_reload_requested)
 
     def _on_start_training_requested(self):
         """Switches to the monitor tab and starts the training process."""
@@ -55,6 +62,13 @@ class TrainerScreen(QWidget):
         self.tab_widget.setCurrentWidget(self.results_tab)
         self.history_updated.emit()
 
+    def _on_config_reload_requested(self, config: dict):
+        """
+        Handles the request to load a historical configuration into the setup tab.
+        """
+        self.setup_tab.set_configuration(config)
+        self.tab_widget.setCurrentWidget(self.setup_tab)
+
     def _save_run_to_history(self, summary_data):
         """Merges config with summary and appends it to the history file."""
         try:
@@ -68,8 +82,11 @@ class TrainerScreen(QWidget):
             with open(config_path, "r") as f:
                 config_data = json.load(f)
             
-            # Create a complete record
-            full_record = {**config_data, **summary_data}
+            # Create a complete record by combining the config used for the run
+            # with the results summary produced at the end.
+            # The config is stored under 'parameter_configuration' in the summary,
+            # so we can just use the summary_data directly.
+            full_record = summary_data
 
             history = []
             if os.path.exists(history_path):

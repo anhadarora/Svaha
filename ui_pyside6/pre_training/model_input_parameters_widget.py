@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -72,7 +73,8 @@ class ModelInputParametersWidget(QWidget):
         self.chart_type_combo.setObjectName("input_params.chart_tensor.chart_type")
         self.chart_type_combo.addItems([
             "Candlestick", "Heikin-Ashi", "Line", "OHLC Bar", 
-            "Hollow Candlestick", "Renko", "Point & Figure", "Dynamic 2D Plane"
+            "Hollow Candlestick", "Renko", #"Point & Figure", # Commented out
+            "Dynamic 2D Plane"
         ])
         self._add_grid_row(chart_layout, 0, "Chart Type:", self.chart_type_combo)
 
@@ -116,6 +118,91 @@ class ModelInputParametersWidget(QWidget):
         estimation_layout.addWidget(self.estimate_expired_label, 2, 1, 1, 3)
 
         layout.addStretch()
+
+    def get_parameters(self):
+        params = {
+            "resampling_factor": self.resampling_factor_spinbox.value(),
+            "input_window_size": self.input_window_size_n_spinbox.value(),
+            "prediction_horizon": self.prediction_horizon_k_spinbox.value(),
+            "chart_type": self.chart_type_combo.currentText(),
+            "channel_depth": self.channel_depth_combo.currentText(),
+        }
+        if params["chart_type"] == "Dynamic 2D Plane":
+            params["dynamic_plane_settings"] = {
+                "basis_vectors": {
+                    "time": self.time_basis_check.isChecked(),
+                    "price": self.price_basis_check.isChecked(),
+                    "volume": self.volume_basis_check.isChecked(),
+                },
+                "normalization_strategy": self.norm_strategy_combo.currentText(),
+                "rotation_logic": self.rotation_logic_combo.currentText(),
+                "include_drift_error": self.drift_error_check.isChecked(),
+                "reference_point_strategy": self.reference_point_strategy.currentText(),
+                "outlier_clip_percentile": self.outlier_clip_percentile.value(),
+            }
+        else:
+            params["style_settings"] = {
+                "target_height": self.target_height_spinbox.value(),
+                "target_width": self.target_width_spinbox.value(),
+                "bar_width": self.bar_width_px_spinbox.value(),
+                "border_thickness": self.border_thickness_px_spinbox.value(),
+                "line_width": self.line_width_px_spinbox.value(),
+                "up_color": self.up_color.name(),
+                "down_color": self.down_color.name(),
+                "bg_color": self.bg_color.name(),
+                "line_color": self.line_color.name(),
+                "scaling_mode": self.scaling_mode_combo.currentText(),
+                "volume_display": self.volume_display_combo.currentText(),
+                "overlays": {
+                    "moving_average": {
+                        "enabled": self.ma_checkbox.isChecked(),
+                        "period": self.ma_period_spinbox.value(),
+                    }
+                }
+            }
+        return params
+
+    def set_parameters(self, params: dict):
+        self.resampling_factor_spinbox.setValue(params.get("resampling_factor", 1))
+        self.input_window_size_n_spinbox.setValue(params.get("input_window_size", 5))
+        self.prediction_horizon_k_spinbox.setValue(params.get("prediction_horizon", 1))
+        self.chart_type_combo.setCurrentText(params.get("chart_type", "Candlestick"))
+        self.channel_depth_combo.setCurrentText(params.get("channel_depth", "RGB (3ch)"))
+
+        if params.get("chart_type") == "Dynamic 2D Plane":
+            settings = params.get("dynamic_plane_settings", {})
+            basis_vectors = settings.get("basis_vectors", {})
+            self.time_basis_check.setChecked(basis_vectors.get("time", True))
+            self.price_basis_check.setChecked(basis_vectors.get("price", True))
+            self.volume_basis_check.setChecked(basis_vectors.get("volume", False))
+            self.norm_strategy_combo.setCurrentText(settings.get("normalization_strategy", "Standard Z-Score"))
+            self.rotation_logic_combo.setCurrentText(settings.get("rotation_logic", "Dynamic"))
+            self.drift_error_check.setChecked(settings.get("include_drift_error", False))
+            self.reference_point_strategy.setCurrentText(settings.get("reference_point_strategy", "Previous Close"))
+            self.outlier_clip_percentile.setValue(settings.get("outlier_clip_percentile", 99.0))
+        else:
+            settings = params.get("style_settings", {})
+            self.target_height_spinbox.setValue(settings.get("target_height", 64))
+            self.target_width_spinbox.setValue(settings.get("target_width", 128))
+            self.bar_width_px_spinbox.setValue(settings.get("bar_width", 5))
+            self.border_thickness_px_spinbox.setValue(settings.get("border_thickness", 1))
+            self.line_width_px_spinbox.setValue(settings.get("line_width", 2))
+            self.up_color = QColor(settings.get("up_color", "#26a69a"))
+            self.down_color = QColor(settings.get("down_color", "#ef5350"))
+            self.bg_color = QColor(settings.get("bg_color", "#2d2d2d"))
+            self.line_color = QColor(settings.get("line_color", "#f0f0f0"))
+            self._update_button_style(self.up_color_button, self.up_color)
+            self._update_button_style(self.down_color_button, self.down_color)
+            self._update_button_style(self.bg_color_button, self.bg_color, is_bg=True)
+            self._update_button_style(self.line_color_button, self.line_color)
+            self.scaling_mode_combo.setCurrentText(settings.get("scaling_mode", "Local Min-Max"))
+            self.volume_display_combo.setCurrentText(settings.get("volume_display", "None"))
+            
+            overlays = settings.get("overlays", {}).get("moving_average", {})
+            self.ma_checkbox.setChecked(overlays.get("enabled", False))
+            self.ma_period_spinbox.setValue(overlays.get("period", 20))
+
+        self.configuration_changed.emit()
 
     def _add_grid_row(self, layout, row, label_text, widget, tooltip=None, column=0):
         label = QLabel(label_text)
@@ -167,49 +254,6 @@ class ModelInputParametersWidget(QWidget):
         self.target_width_spinbox.valueChanged.connect(self._update_per_sample_estimate)
         self.channel_depth_combo.currentIndexChanged.connect(self._update_per_sample_estimate)
         self.calculate_total_size_button.clicked.connect(self.calculate_total_size_requested)
-
-    def get_parameters(self):
-        params = {
-            "resampling_factor": self.resampling_factor_spinbox.value(),
-            "input_window_size": self.input_window_size_n_spinbox.value(),
-            "prediction_horizon": self.prediction_horizon_k_spinbox.value(),
-            "chart_type": self.chart_type_combo.currentText(),
-            "channel_depth": self.channel_depth_combo.currentText(),
-        }
-        if params["chart_type"] == "Dynamic 2D Plane":
-            params["dynamic_plane_settings"] = {
-                "basis_vectors": {
-                    "time": self.time_basis_check.isChecked(),
-                    "price": self.price_basis_check.isChecked(),
-                    "volume": self.volume_basis_check.isChecked(),
-                },
-                "normalization_strategy": self.norm_strategy_combo.currentText(),
-                "rotation_logic": self.rotation_logic_combo.currentText(),
-                "include_drift_error": self.drift_error_check.isChecked(),
-                "reference_point_strategy": self.reference_point_strategy.currentText(),
-                "outlier_clip_percentile": self.outlier_clip_percentile.value(),
-            }
-        else:
-            params["style_settings"] = {
-                "target_height": self.target_height_spinbox.value(),
-                "target_width": self.target_width_spinbox.value(),
-                "bar_width": self.bar_width_px_spinbox.value(),
-                "border_thickness": self.border_thickness_px_spinbox.value(),
-                "line_width": self.line_width_px_spinbox.value(),
-                "up_color": self.up_color.name(),
-                "down_color": self.down_color.name(),
-                "bg_color": self.bg_color.name(),
-                "line_color": self.line_color.name(),
-                "scaling_mode": self.scaling_mode_combo.currentText(),
-                "volume_display": self.volume_display_combo.currentText(),
-                "overlays": {
-                    "moving_average": {
-                        "enabled": self.ma_checkbox.isChecked(),
-                        "period": self.ma_period_spinbox.value(),
-                    }
-                }
-            }
-        return params
 
     def _emit_resolution(self):
         res_text = f"{self.target_height_spinbox.value()} x {self.target_width_spinbox.value()}"

@@ -1,0 +1,13 @@
+[
+    "Seed for this run: 1766100350.616373",
+    "Generated 2 permutations to test.",
+    "--- Running Permutation: End-to-End Run (ViT, Date Range) ---",
+    "Resetting UI state...",
+    "Clicked 'Apply and Run'.",
+    "--- PERMUTATION FAILED: End-to-End Run (ViT, Date Range) ---",
+    "    Reason: Permutation failed with exception: waitUntil timed out in 90000 milliseconds",
+    "--- Running Permutation: Failure case: No data source selected ---",
+    "Resetting UI state...",
+    "Verified 'Apply and Run' is disabled.",
+    "--- PERMUTATION PASSED: Failure case: No data source selected ---"
+]

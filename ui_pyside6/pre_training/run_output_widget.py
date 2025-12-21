@@ -76,6 +76,25 @@ class RunOutputWidget(QWidget):
         for checkbox in self.all_checkboxes:
             checkbox.setChecked(True)
 
+    def get_parameters(self):
+        return {
+            "output_metrics": {cb.text(): cb.isChecked() for cb in self.all_checkboxes},
+            # experiment_name is handled separately in the parent
+        }
+
+    def set_parameters(self, params: dict):
+        # Set experiment name
+        self.experiment_name.setText(params.get("experiment_name", ""))
+        self.is_manually_edited = True # Assume a loaded name is manually set
+        self.revert_button.setVisible(True)
+
+        # Set output metrics checkboxes
+        output_metrics = params.get("output_metrics", {})
+        for checkbox in self.all_checkboxes:
+            checkbox.setChecked(output_metrics.get(checkbox.text(), True))
+        
+        self.configuration_changed.emit()
+
     def connect_signals(self):
         self.experiment_name.textEdited.connect(self._on_name_manually_edited)
         self.revert_button.clicked.connect(self.on_revert_clicked)
@@ -102,11 +121,6 @@ class RunOutputWidget(QWidget):
         self.regeneration_requested.emit()
         self.revert_button.setVisible(False)
 
-    def get_parameters(self):
-        return {
-            "output_metrics": {cb.text(): cb.isChecked() for cb in self.all_checkboxes}
-        }
-
     def get_sanitized_name(self):
         name = self.experiment_name.text()
         sanitized_name = re.sub(r'[^a-zA-Z0-9_-]', '', name.replace(' ', '_'))
@@ -120,7 +134,7 @@ class RunOutputWidget(QWidget):
         short_id = hasher.hexdigest()[:12]
         
         self.experiment_name.blockSignals(True)
-        self.experiment_name.setText(short_id)
+        self.experiment_.setText(short_id)
         self.experiment_name.blockSignals(False)
         
         self.revert_button.setVisible(False)

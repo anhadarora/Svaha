@@ -1,27 +1,15 @@
+
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QScrollArea
 from ..post_training.experiment_summary_widget import ExperimentSummaryWidget
 from ..post_training.parameter_configuration_widget import ParameterConfigurationWidget
-from ..post_training.kpi_widget import KpiWidget
-from ..post_training.trade_statistics_widget import TradeStatisticsWidget
-from ..post_training.plots.loss_vs_epoch_plot_widget import LossVsEpochPlotWidget
-from ..post_training.plots.correctness_vs_epoch_plot_widget import (
-    CorrectnessVsEpochPlotWidget,
-)
-from ..post_training.plots.equity_curve_plot_widget import EquityCurvePlotWidget
-from ..post_training.plots.correction_factor_history_plot_widget import (
-    CorrectionFactorHistoryPlotWidget,
-)
-from ..post_training.plots.error_component_histogram_widget import (
-    ErrorComponentHistogramWidget,
-)
-from ..post_training.plots.frame_shift_stability_histogram_widget import (
-    FrameShiftStabilityHistogramWidget,
-)
-
+from ..post_training.plots.sample_prediction_plot_widget import SamplePredictionPlotWidget
+from ..post_training.plots.confusion_matrix_widget import ConfusionMatrixWidget
 
 class ResultsTabWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self.dynamic_widgets = []
+        
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
@@ -31,59 +19,58 @@ class ResultsTabWidget(QWidget):
 
         container = QWidget()
         scroll_area.setWidget(container)
-        main_grid = QGridLayout(container)
+        self.main_grid = QGridLayout(container)
 
-        # --- Instantiate Widgets ---
+        # --- Static Widgets ---
         self.summary_widget = ExperimentSummaryWidget()
         self.params_widget = ParameterConfigurationWidget()
-        self.kpi_widget = KpiWidget()
-        self.trades_widget = TradeStatisticsWidget()
-        self.loss_plot = LossVsEpochPlotWidget()
-        self.correctness_plot = CorrectnessVsEpochPlotWidget()
-        self.equity_curve_plot = EquityCurvePlotWidget()
-        self.correction_factor_plot = CorrectionFactorHistoryPlotWidget()
-        self.error_hist_plot = ErrorComponentHistogramWidget()
-        self.frame_shift_hist_plot = FrameShiftStabilityHistogramWidget()
-
-        self.all_widgets = [
-            self.summary_widget, self.params_widget, self.kpi_widget,
-            self.trades_widget, self.loss_plot, self.correctness_plot,
-            self.equity_curve_plot, self.correction_factor_plot,
-            self.error_hist_plot, self.frame_shift_hist_plot
-        ]
-
-        # --- Layout Widgets ---
-        main_grid.addWidget(self.summary_widget, 0, 0, 1, 2)
-        main_grid.addWidget(self.params_widget, 0, 2, 1, 2)
-        main_grid.addWidget(self.kpi_widget, 1, 0, 1, 2)
-        main_grid.addWidget(self.trades_widget, 1, 2, 1, 2)
-        main_grid.addWidget(self.loss_plot, 2, 0)
-        main_grid.addWidget(self.correctness_plot, 2, 1)
-        main_grid.addWidget(self.equity_curve_plot, 2, 2)
-        main_grid.addWidget(self.correction_factor_plot, 3, 0)
-        main_grid.addWidget(self.error_hist_plot, 3, 1)
-        main_grid.addWidget(self.frame_shift_hist_plot, 3, 2)
+        
+        self.main_grid.addWidget(self.summary_widget, 0, 0)
+        self.main_grid.addWidget(self.params_widget, 0, 1)
 
     def load_results(self, summary_data: dict):
         """
-        Public slot to receive the final results dictionary and populate all child widgets.
+        Public slot to receive the final results dictionary and dynamically populate the tab.
         """
+        self._clear_dynamic_widgets()
+        
         if not summary_data:
             print("Results tab received empty summary data.")
             return
 
-        # Pass the relevant slice of data to each widget
+        # --- Update Static Widgets ---
         self.summary_widget.update_data(summary_data.get("experiment_summary", {}))
         self.params_widget.update_data(summary_data.get("parameter_configuration", {}))
-        self.kpi_widget.update_data(summary_data.get("kpis", {}))
-        self.trades_widget.update_data(summary_data.get("trade_statistics", {}))
+
+        # --- Dynamically Create and Populate Inference Widgets ---
+        inference_results = summary_data.get("inference_results", {})
+        if not inference_results:
+            return
+            
+        row = 1 # Start placing dynamic widgets below the static ones
         
-        # Pass the full plot data to all plot widgets
-        plot_data = summary_data.get("plot_data", {})
-        if plot_data:
-            self.loss_plot.update_data(plot_data)
-            self.correctness_plot.update_data(plot_data)
-            self.equity_curve_plot.update_data(plot_data)
-            self.correction_factor_plot.update_data(plot_data)
-            self.error_hist_plot.update_data(plot_data)
-            self.frame_shift_hist_plot.update_data(plot_data)
+        for head_name, results in inference_results.items():
+            # Determine if the head is classification or regression
+            is_classification = 'classification' in head_name or 'confidence' in head_name
+            
+            # 1. Create Sample Prediction Plot
+            mode = 'classification' if is_classification else 'regression'
+            pred_plot = SamplePredictionPlotWidget(title=f"Sample Predictions: {head_name}", mode=mode)
+            pred_plot.update_data(results.get('true_sample', []), results.get('pred_sample', []))
+            self.main_grid.addWidget(pred_plot, row, 0)
+            self.dynamic_widgets.append(pred_plot)
+            
+            # 2. Create Confusion Matrix if available
+            if 'confusion_matrix' in results:
+                cm_widget = ConfusionMatrixWidget(title=f"Confusion Matrix: {head_name}")
+                cm_widget.update_data(results.get('confusion_matrix', []))
+                self.main_grid.addWidget(cm_widget, row, 1)
+                self.dynamic_widgets.append(cm_widget)
+            
+            row += 1 # Move to the next row for the next head
+
+    def _clear_dynamic_widgets(self):
+        for widget in self.dynamic_widgets:
+            self.main_grid.removeWidget(widget)
+            widget.deleteLater()
+        self.dynamic_widgets.clear()

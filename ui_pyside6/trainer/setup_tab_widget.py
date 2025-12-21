@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QScrollArea,
 )
-from PySide6.QtCore import Signal, Qt, QTimer, QSize
+from PySide6.QtCore import Signal, Qt, QTimer, QSize, QThreadPool
 
 import json
 import os
@@ -22,6 +22,33 @@ from ..pre_training.prediction_target_widget import PredictionTargetWidget
 from ..pre_training.error_correction_widget import ErrorCorrectionWidget
 from ..pre_training.run_output_widget import RunOutputWidget
 from ..pre_training.file_saving_widget import FileSavingWidget
+from ..pre_training.disk_space_calculator import DiskSpaceCalculator
+
+class AdaptiveStackedWidget(QStackedWidget):
+    def __init__(self):
+        super().__init__()
+        self.currentChanged.connect(self.update_geometry)
+
+    def update_geometry(self):
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if i == self.currentIndex():
+                widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                widget.show()
+            else:
+                widget.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+                widget.hide()
+        self.updateGeometry()
+
+    def sizeHint(self):
+        if self.currentWidget():
+            return self.currentWidget().sizeHint()
+        return super().sizeHint()
+
+    def minimumSizeHint(self):
+        if self.currentWidget():
+            return self.currentWidget().minimumSizeHint()
+        return super().minimumSizeHint()
 
 
 class SetupTabWidget(QWidget):
@@ -49,7 +76,6 @@ class SetupTabWidget(QWidget):
         main_layout = QHBoxLayout()
         self.layout.addLayout(main_layout, 1)
 
-        # --- Sidebar ---
         self.nav_list = QListWidget()
         self.nav_list.setObjectName("setup_tab.navigation_list")
         self.nav_list.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
@@ -57,21 +83,18 @@ class SetupTabWidget(QWidget):
         self.nav_list.setIconSize(QSize(16, 16))
         main_layout.addWidget(self.nav_list)
 
-        # --- Main Content Area (Scrollable) ---
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         main_layout.addWidget(scroll_area, 1)
 
         content_container = QWidget()
         scroll_area.setWidget(content_container)
-        
         content_layout = QVBoxLayout(content_container)
         content_layout.setContentsMargins(10, 10, 10, 10)
 
-        self.stack = QStackedWidget()
-        content_layout.addWidget(self.stack, 1)
+        self.stack = AdaptiveStackedWidget()
+        content_layout.addWidget(self.stack)
 
-        # --- Navigation Buttons for Stack ---
         nav_button_layout = QHBoxLayout()
         nav_button_layout.addStretch()
         self.back_button = QPushButton("< Back")
@@ -81,29 +104,24 @@ class SetupTabWidget(QWidget):
         nav_button_layout.addWidget(self.back_button)
         nav_button_layout.addWidget(self.next_button)
         content_layout.addLayout(nav_button_layout)
+        content_layout.addStretch()
 
-
-        # --- Instantiate and Layout Widgets ---
         self._setup_wizard_pages()
 
-        # --- Control Buttons ---
         control_button_layout = QHBoxLayout()
         self.apply_button = QPushButton("Apply")
-        self.apply_button.setObjectName("setup_tab.apply_button")
         self.apply_and_run_button = QPushButton("Apply and Run")
-        self.apply_and_run_button.setObjectName("setup_tab.apply_and_run_button")
-        self.apply_and_run_button.setStyleSheet("""
-            background-color: #0d6efd; 
-            color: white; 
-            font-weight: bold; 
-            padding: 10px;
-        """)
+        self.apply_button.setFixedWidth(200)
+        self.apply_and_run_button.setFixedWidth(200)
+        self.apply_button.setStyleSheet("background-color: #FFB74D; color: black; font-weight: bold; padding: 10px; border-radius: 5px;")
+        self.apply_and_run_button.setStyleSheet("background-color: #F57C00; color: white; font-weight: bold; padding: 10px; border-radius: 5px;")
         control_button_layout.addStretch()
         control_button_layout.addWidget(self.apply_button)
+        control_button_layout.addSpacing(20)
         control_button_layout.addWidget(self.apply_and_run_button)
+        control_button_layout.addStretch()
         self.layout.addLayout(control_button_layout)
 
-        # --- Finalize setup after event loop starts ---
         QTimer.singleShot(0, self.finalize_setup)
 
     def _setup_wizard_pages(self):
@@ -111,141 +129,90 @@ class SetupTabWidget(QWidget):
             widget = widget_class()
             self.widgets.append(widget)
             self.stack.addWidget(widget)
-
-            item = QListWidgetItem(f"○ {name}")
-            self.nav_list.addItem(item)
-
-        # Assign widgets to instance variables for later access
+            self.nav_list.addItem(QListWidgetItem(f"○ {name}"))
         (
-            self.data_source_widget,
-            self.model_input_parameters_widget,
-            self.model_architecture_widget,
-            self.prediction_target_widget,
-            self.error_correction_widget,
-            self.file_saving_widget,
+            self.data_source_widget, self.model_input_parameters_widget,
+            self.model_architecture_widget, self.prediction_target_widget,
+            self.error_correction_widget, self.file_saving_widget,
             self.run_output_widget,
         ) = self.widgets
 
     def finalize_setup(self):
-        """Connects all signals and sets initial states after UI is constructed."""
         self._connect_signals()
         self.on_data_source_selected(False)
         self.update_experiment_id()
-        
-        # Emit initial states for connected widgets
         self._on_chart_type_changed(self.model_input_parameters_widget.chart_type_combo.currentText())
         self.model_input_parameters_widget._emit_resolution()
-        self.model_input_parameters_widget.window_size_changed.emit(
-            self.model_input_parameters_widget.input_window_size_n_spinbox.value()
-        )
+        self.model_input_parameters_widget.window_size_changed.emit(self.model_input_parameters_widget.input_window_size_n_spinbox.value())
         self.model_architecture_widget._emit_prediction_heads_changed()
         self.model_input_parameters_widget._update_per_sample_estimate()
         self.model_input_parameters_widget.invalidate_total_estimate()
-
         self.nav_list.setCurrentRow(0)
         self._update_nav_buttons(0)
         self._update_visited_status(0)
         self.is_fully_initialized = True
 
     def _connect_signals(self):
-        self.widgets_to_toggle = self.widgets[1:] + [
-            self.apply_button,
-            self.apply_and_run_button,
-        ]
-
-        # Wizard navigation
+        self.widgets_to_toggle = self.widgets[1:] + [self.apply_button, self.apply_and_run_button]
         self.nav_list.currentRowChanged.connect(self.stack.setCurrentIndex)
         self.stack.currentChanged.connect(self._update_nav_buttons)
         self.stack.currentChanged.connect(self._update_visited_status)
         self.next_button.clicked.connect(self.go_to_next_page)
         self.back_button.clicked.connect(self.go_to_previous_page)
-
-        # Core logic
-        self.data_source_widget.data_source_selected.connect(
-            self.on_data_source_selected
-        )
-        self.run_output_widget.regeneration_requested.connect(
-            self.update_experiment_id
-        )
-
-        # Connect signals from children now that they are all constructed
+        self.data_source_widget.data_source_selected.connect(self.on_data_source_selected)
+        self.run_output_widget.regeneration_requested.connect(self.update_experiment_id)
         for widget in self.widgets:
-            if hasattr(widget, "connect_signals"):
-                widget.connect_signals()
-
-        # Connect the configuration changed signals to the parent slot
-        for widget in self.widgets:
+            if hasattr(widget, "connect_signals"): widget.connect_signals()
             if hasattr(widget, "configuration_changed"):
-                widget.configuration_changed.connect(
-                    self._on_parameter_changed, Qt.QueuedConnection
-                )
-                # Also invalidate the total size estimate on any change
-                widget.configuration_changed.connect(
-                    self.model_input_parameters_widget.invalidate_total_estimate
-                )
-
-        # Inter-widget communication
-        self.model_input_parameters_widget.resolution_changed.connect(
-            self.model_architecture_widget.set_target_resolution
-        )
-        self.model_input_parameters_widget.window_size_changed.connect(
-            self.model_architecture_widget.set_sequence_modeling_visibility
-        )
-        self.model_input_parameters_widget.chart_type_combo.currentTextChanged.connect(
-            self._on_chart_type_changed
-        )
-        self.model_architecture_widget.prediction_heads_changed.connect(
-            self.prediction_target_widget.update_visibility
-        )
-        self.model_input_parameters_widget.calculate_total_size_requested.connect(
-            self._on_calculate_total_size_requested
-        )
-
+                widget.configuration_changed.connect(self._on_parameter_changed, Qt.QueuedConnection)
+                widget.configuration_changed.connect(self.model_input_parameters_widget.invalidate_total_estimate)
+        self.model_input_parameters_widget.resolution_changed.connect(self.model_architecture_widget.set_target_resolution)
+        self.model_input_parameters_widget.window_size_changed.connect(self.model_architecture_widget.set_sequence_modeling_visibility)
+        self.model_input_parameters_widget.chart_type_combo.currentTextChanged.connect(self._on_chart_type_changed)
+        self.model_architecture_widget.prediction_heads_changed.connect(self.prediction_target_widget.update_visibility)
+        self.model_input_parameters_widget.calculate_total_size_requested.connect(self._on_calculate_total_size_requested)
         self.apply_button.clicked.connect(self._on_apply)
         self.apply_and_run_button.clicked.connect(self._on_apply_and_run)
 
+    def set_configuration(self, config: dict):
+        for widget in self.widgets:
+            if hasattr(widget, "set_parameters"):
+                widget.set_parameters(config)
+        self._on_parameter_changed()
+        chart_type = self.model_input_parameters_widget.chart_type_combo.currentText()
+        self._on_chart_type_changed(chart_type)
+        self.model_architecture_widget._emit_prediction_heads_changed()
+
     def go_to_next_page(self):
         current_index = self.stack.currentIndex()
-        if current_index < self.stack.count() - 1:
-            self.stack.setCurrentIndex(current_index + 1)
+        if current_index < self.stack.count() - 1: self.stack.setCurrentIndex(current_index + 1)
 
     def go_to_previous_page(self):
         current_index = self.stack.currentIndex()
-        if current_index > 0:
-            self.stack.setCurrentIndex(current_index - 1)
+        if current_index > 0: self.stack.setCurrentIndex(current_index - 1)
 
     def _update_nav_buttons(self, index):
         self.back_button.setEnabled(index > 0)
         self.next_button.setEnabled(index < self.stack.count() - 1)
-        # Sync list widget selection without re-emitting the signal
-        if self.nav_list.currentRow() != index:
-            self.nav_list.setCurrentRow(index)
+        if self.nav_list.currentRow() != index: self.nav_list.setCurrentRow(index)
 
     def _update_visited_status(self, index):
         if index not in self.visited_pages:
             self.visited_pages.add(index)
             item = self.nav_list.item(index)
             if item:
-                # Update text to show checkmark, preserving the original name
                 original_text = item.text().lstrip("○ ").lstrip("✔ ")
                 item.setText(f"✔ {original_text}")
 
     def on_data_source_selected(self, is_selected):
-        for widget in self.widgets_to_toggle:
-            widget.setEnabled(is_selected)
-        
-        # Also enable the navigation list beyond the first item
+        for widget in self.widgets_to_toggle: widget.setEnabled(is_selected)
         for i in range(1, self.nav_list.count()):
             item = self.nav_list.item(i)
-            if item:
-                item.setFlags(item.flags() | Qt.ItemIsEnabled if is_selected else item.flags() & ~Qt.ItemIsEnabled)
-
+            if item: item.setFlags(item.flags() | Qt.ItemIsEnabled if is_selected else item.flags() & ~Qt.ItemIsEnabled)
 
     def _on_parameter_changed(self):
-        if not self.is_fully_initialized:
-            return
-        if not self.run_output_widget.is_manually_edited:
-            self.update_experiment_id()
+        if not self.is_fully_initialized: return
+        if not self.run_output_widget.is_manually_edited: self.update_experiment_id()
 
     def _on_chart_type_changed(self, chart_type_text):
         is_dynamic = chart_type_text == "Dynamic 2D Plane"
@@ -254,27 +221,36 @@ class SetupTabWidget(QWidget):
         self.error_correction_widget.set_dynamic_plane_mode(is_dynamic)
 
     def _on_calculate_total_size_requested(self):
-        # This is where the heavy calculation will be triggered.
-        # For now, we'll simulate it to confirm the UI works.
         self.model_input_parameters_widget.set_total_size_estimate("", "", "calculating")
+        config = self.get_configuration()
+        
+        calculator = DiskSpaceCalculator(config)
+        calculator.signals.finished.connect(self._on_calculation_finished)
+        QThreadPool.globalInstance().start(calculator)
 
-        # In a real implementation, a worker thread would be started here.
-        # We use a QTimer to simulate a delay.
-        def _fake_calculation_done():
-            # This would be called by the worker thread's finished signal.
-            dummy_size = 5.4 
-            dummy_files = 12345
-            self.model_input_parameters_widget.set_total_size_estimate(
-                f"~ {dummy_size:.2f} GB", f"{dummy_files:,} files", "done"
-            )
+    def _on_calculation_finished(self, results):
+        status = results.get("status")
+        if status == "done":
+            total_bytes = results.get("total_bytes", 0)
+            num_files = results.get("num_files", 0)
+            
+            if total_bytes < 1024**2:
+                size_str = f"{total_bytes / 1024:.2f} KB"
+            elif total_bytes < 1024**3:
+                size_str = f"{total_bytes / 1024**2:.2f} MB"
+            else:
+                size_str = f"{total_bytes / 1024**3:.2f} GB"
 
-        QTimer.singleShot(2000, _fake_calculation_done) # Simulate 2-second calculation
+            self.model_input_parameters_widget.set_total_size_estimate(f"~ {size_str}", f"{num_files:,} files", "done")
+        else:
+            error_message = results.get("message", "An unknown error occurred.")
+            self.model_input_parameters_widget.set_total_size_estimate("Error", "", "error")
+            QMessageBox.critical(self, "Calculation Error", f"Failed to calculate disk space:\n{error_message}")
 
     def get_configuration(self):
         config = {}
         for widget in self.widgets:
-            if hasattr(widget, "get_parameters"):
-                config.update(widget.get_parameters())
+            if hasattr(widget, "get_parameters"): config.update(widget.get_parameters())
         config["experiment_name"] = self.run_output_widget.get_sanitized_name()
         return config
 
@@ -286,27 +262,18 @@ class SetupTabWidget(QWidget):
 
     def _on_apply(self):
         config = self.get_configuration()
-
         build_dir = os.path.abspath("./build")
         os.makedirs(build_dir, exist_ok=True)
-
         save_path = os.path.join(build_dir, "last_applied_config.json")
-
         try:
-            with open(save_path, "w") as f:
-                json.dump(config, f, indent=4)
-
+            with open(save_path, "w") as f: json.dump(config, f, indent=4)
             msg_box = QMessageBox(self)
             msg_box.setWindowTitle("Success")
             msg_box.setText("Configuration has been applied successfully.")
-            msg_box.setInformativeText(
-                f"Ready to run experiment: {config['experiment_name']}\n\n"
-                "You can now switch to the Monitor tab to begin the experiment."
-            )
+            msg_box.setInformativeText(f"Ready to run experiment: {config['experiment_name']}\n\nYou can now switch to the Monitor tab to begin the experiment.")
             msg_box.setIcon(QMessageBox.Information)
             msg_box.setStandardButtons(QMessageBox.Ok)
             msg_box.exec()
-
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to save configuration:\n{e}")
 

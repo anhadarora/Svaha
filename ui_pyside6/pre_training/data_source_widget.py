@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -56,6 +57,39 @@ class DataSourceWidget(QWidget):
             params["k_folds"] = self.k_folds_spinbox.value()
             
         return params
+
+    def set_parameters(self, params: dict):
+        """Sets the UI state from a configuration dictionary."""
+        # Block signals to prevent rapid firing of configuration_changed
+        self.blockSignals(True)
+
+        self.time_interval_combo.setCurrentText(params.get("interval", "All Intervals"))
+        
+        # This will trigger a filter, so available instruments are updated
+        self._filter_available_instruments() 
+        
+        self.selected_symbols = params.get("instruments", [])
+        self.refresh_lists() # This updates the selected list and date guidance
+
+        self.master_start_date.setDate(QDate.fromString(params.get("master_start_date", ""), "yyyy-MM-dd"))
+        self.master_end_date.setDate(QDate.fromString(params.get("master_end_date", ""), "yyyy-MM-dd"))
+
+        validation_method = params.get("validation_method", "Percentage Split")
+        self.split_method_combo.setCurrentText(validation_method)
+        
+        if validation_method == "Date Range":
+            self.training_start_date.setDate(QDate.fromString(params.get("training_start_date", ""), "yyyy-MM-dd"))
+            self.training_end_date.setDate(QDate.fromString(params.get("training_end_date", ""), "yyyy-MM-dd"))
+            self.validation_start_date.setDate(QDate.fromString(params.get("validation_start_date", ""), "yyyy-MM-dd"))
+            self.validation_end_date.setDate(QDate.fromString(params.get("validation_end_date", ""), "yyyy-MM-dd"))
+        elif validation_method == "Percentage Split":
+            self.validation_percent_spinbox.setValue(params.get("validation_percentage", 20))
+        elif validation_method == "Time-Series K-Fold":
+            self.k_folds_spinbox.setValue(params.get("k_folds", 5))
+            
+        # Unblock signals and emit one change signal
+        self.blockSignals(False)
+        self.configuration_changed.emit()
 
     def init_ui(self):
         self.layout = QVBoxLayout(self)

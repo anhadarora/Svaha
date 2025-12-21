@@ -1,0 +1,8 @@
+[
+    "Seed for this run: 1766092507.7325282",
+    "Starting user scenarios...",
+    "--- SCENARIO START: Verify auto-login with existing session ---",
+    "--- SCENARIO FAILED: Verify auto-login with existing session ---",
+    "    Reason: Scenario failed with exception: Funds card is not visible, auto-login failed.",
+    "All user scenarios finished."
+]

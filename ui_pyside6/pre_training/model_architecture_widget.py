@@ -39,7 +39,7 @@ class ModelArchitectureWidget(QWidget):
             "EfficientNet-B7",
             "ResNet-50",
             "ViT-Base-Patch16",
-            "Swin-Transformer",
+            # "Swin-Transformer", # Commented out due to dependency issues
         ])
         architecture_label = QLabel("Backbone:")
         architecture_label.setBuddy(self.architecture_selection)
@@ -214,6 +214,81 @@ class ModelArchitectureWidget(QWidget):
 
         self.layout.addStretch()
 
+    def get_parameters(self):
+        """Return a dictionary of the current configuration."""
+        return {
+            "backbone": {
+                "architecture": self.architecture_selection.currentText(),
+                "pretrained": self.pretrained_weights.isChecked(),
+                "freeze": self.freeze_backbone.isChecked(),
+            },
+            "sequence_modeling": {
+                "aggregator": self.temporal_aggregator.currentText(),
+            },
+            "prediction_heads": {
+                "primary_output": self.primary_output.currentText(),
+                "auxiliary_heads": {
+                    "rally_time": self.rally_time_prediction.isChecked(),
+                    "directional_confidence": self.directional_confidence.isChecked(),
+                },
+                "head_architecture": {
+                    "hidden_units": self.hidden_units.value(),
+                    "dropout": self.dropout.value(),
+                    "activation": self.activation.currentText(),
+                },
+            },
+            "training": {
+                "learning_rate": self.learning_rate.text(),
+                "optimizer": self.optimizer.currentText(),
+                "loss_function": self.loss_function.currentText(),
+                "batch_size": self.batch_size.value(),
+                "max_epochs": self.max_epochs.value(),
+                "early_stopping_patience": self.early_stopping_patience.value(),
+            },
+            "input_constraints": {
+                "input_channels": self.input_channels.value(),
+            },
+        }
+
+    def set_parameters(self, params: dict):
+        # Backbone
+        backbone_params = params.get("backbone", {})
+        self.architecture_selection.setCurrentText(backbone_params.get("architecture", "EfficientNet-B7"))
+        self.pretrained_weights.setChecked(backbone_params.get("pretrained", True))
+        self.freeze_backbone.setChecked(backbone_params.get("freeze", True))
+
+        # Sequence Modeling
+        sequence_params = params.get("sequence_modeling", {})
+        self.temporal_aggregator.setCurrentText(sequence_params.get("aggregator", "None (Channel Stack)"))
+
+        # Prediction Heads
+        heads_params = params.get("prediction_heads", {})
+        self.primary_output.setCurrentText(heads_params.get("primary_output", "Scalar Regression (Return %)"))
+        
+        aux_heads = heads_params.get("auxiliary_heads", {})
+        self.rally_time_prediction.setChecked(aux_heads.get("rally_time", False))
+        self.directional_confidence.setChecked(aux_heads.get("directional_confidence", False))
+        
+        head_arch = heads_params.get("head_architecture", {})
+        self.hidden_units.setValue(head_arch.get("hidden_units", 512))
+        self.dropout.setValue(head_arch.get("dropout", 0.2))
+        self.activation.setCurrentText(head_arch.get("activation", "ReLU"))
+
+        # Training Hyperparameters
+        training_params = params.get("training", {})
+        self.learning_rate.setText(training_params.get("learning_rate", "1e-3"))
+        self.optimizer.setCurrentText(training_params.get("optimizer", "Adam"))
+        self.loss_function.setCurrentText(training_params.get("loss_function", "MSE"))
+        self.batch_size.setValue(training_params.get("batch_size", 32))
+        self.max_epochs.setValue(training_params.get("max_epochs", 100))
+        self.early_stopping_patience.setValue(training_params.get("early_stopping_patience", 10))
+
+        # Input Constraints
+        input_params = params.get("input_constraints", {})
+        self.input_channels.setValue(input_params.get("input_channels", 3))
+
+        self.configuration_changed.emit()
+
     def connect_signals(self):
         """Connect all widget signals to the configuration_changed signal."""
         self.architecture_selection.currentIndexChanged.connect(self.configuration_changed)
@@ -250,42 +325,6 @@ class ModelArchitectureWidget(QWidget):
             "directional_confidence": self.directional_confidence.isChecked(),
         }
         self.prediction_heads_changed.emit(state)
-
-    def get_parameters(self):
-        """Return a dictionary of the current configuration."""
-        return {
-            "backbone": {
-                "architecture": self.architecture_selection.currentText(),
-                "pretrained": self.pretrained_weights.isChecked(),
-                "freeze": self.freeze_backbone.isChecked(),
-            },
-            "sequence_modeling": {
-                "aggregator": self.temporal_aggregator.currentText(),
-            },
-            "prediction_heads": {
-                "primary_output": self.primary_output.currentText(),
-                "auxiliary_heads": {
-                    "rally_time": self.rally_time_prediction.isChecked(),
-                    "directional_confidence": self.directional_confidence.isChecked(),
-                },
-                "head_architecture": {
-                    "hidden_units": self.hidden_units.value(),
-                    "dropout": self.dropout.value(),
-                    "activation": self.activation.currentText(),
-                },
-            },
-            "training": {
-                "learning_rate": self.learning_rate.text(),
-                "optimizer": self.optimizer.currentText(),
-                "loss_function": self.loss_function.currentText(),
-                "batch_size": self.batch_size.value(),
-                "max_epochs": self.max_epochs.value(),
-                "early_stopping_patience": self.early_stopping_patience.value(),
-            },
-            "input_constraints": {
-                "input_channels": self.input_channels.value(),
-            },
-        }
 
     def set_target_resolution(self, resolution_text):
         """Slot to update the read-only resolution display."""

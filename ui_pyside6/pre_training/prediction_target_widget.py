@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -107,22 +108,6 @@ class PredictionTargetWidget(QWidget):
         self.rally_time_group.setVisible(False)
         self.frame_reference_group.setVisible(False)
 
-    def _add_grid_row(self, layout, row, label_text, widget):
-        label = QLabel(label_text)
-        label.setBuddy(widget)
-        layout.addWidget(label, row, 0)
-        layout.addWidget(widget, row, 1)
-
-    def connect_signals(self):
-        self.return_calculation.currentIndexChanged.connect(self.configuration_changed)
-        self.label_scaling.currentIndexChanged.connect(self.configuration_changed)
-        self.class_logic.currentIndexChanged.connect(self.configuration_changed)
-        self.buy_threshold.valueChanged.connect(self.configuration_changed)
-        self.sell_threshold.valueChanged.connect(self.configuration_changed)
-        self.target_magnitude.valueChanged.connect(self.configuration_changed)
-        self.max_horizon.valueChanged.connect(self.configuration_changed)
-        self.target_frame.currentIndexChanged.connect(self.configuration_changed)
-
     def get_parameters(self):
         params = {
             "regression_logic": {
@@ -146,6 +131,44 @@ class PredictionTargetWidget(QWidget):
                 "target_frame": self.target_frame.currentText(),
             }
         return params
+
+    def set_parameters(self, params: dict):
+        regression_params = params.get("regression_logic", {})
+        self.return_calculation.setCurrentText(regression_params.get("return_calculation", "Standard (Close to Close)"))
+        self.label_scaling.setCurrentText(regression_params.get("label_scaling", "Percent"))
+
+        class_params = params.get("classification_settings", {})
+        if class_params: # Check if the section exists
+            self.class_logic.setCurrentText(class_params.get("class_logic", "Ternary (Buy/Sell/Hold)"))
+            self.buy_threshold.setValue(class_params.get("buy_threshold", 1.0))
+            self.sell_threshold.setValue(class_params.get("sell_threshold", -1.0))
+
+        rally_params = params.get("rally_time_settings", {})
+        if rally_params:
+            self.target_magnitude.setValue(rally_params.get("target_magnitude", 2.0))
+            self.max_horizon.setValue(rally_params.get("max_horizon", 50))
+            
+        frame_params = params.get("frame_reference", {})
+        if frame_params:
+            self.target_frame.setCurrentText(frame_params.get("target_frame", "Global (Absolute Return)"))
+
+        self.configuration_changed.emit()
+
+    def _add_grid_row(self, layout, row, label_text, widget):
+        label = QLabel(label_text)
+        label.setBuddy(widget)
+        layout.addWidget(label, row, 0)
+        layout.addWidget(widget, row, 1)
+
+    def connect_signals(self):
+        self.return_calculation.currentIndexChanged.connect(self.configuration_changed)
+        self.label_scaling.currentIndexChanged.connect(self.configuration_changed)
+        self.class_logic.currentIndexChanged.connect(self.configuration_changed)
+        self.buy_threshold.valueChanged.connect(self.configuration_changed)
+        self.sell_threshold.valueChanged.connect(self.configuration_changed)
+        self.target_magnitude.valueChanged.connect(self.configuration_changed)
+        self.max_horizon.valueChanged.connect(self.configuration_changed)
+        self.target_frame.currentIndexChanged.connect(self.configuration_changed)
 
     def update_visibility(self, heads_state: dict):
         """Updates visibility of conditional sections based on head selections."""

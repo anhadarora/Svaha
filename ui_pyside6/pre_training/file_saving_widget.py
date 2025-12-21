@@ -1,3 +1,4 @@
+
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -46,6 +47,19 @@ class FileSavingWidget(QWidget):
             "augmented_data_path"
         )
 
+    def get_parameters(self):
+        return {
+            "model_save_path": self.model_path_edit.text(),
+            "training_data_path": self.training_data_path_edit.text(),
+            "augmented_data_path": self.augmented_data_path_edit.text(),
+        }
+
+    def set_parameters(self, params: dict):
+        self.model_path_edit.setText(params.get("model_save_path", os.path.abspath("./build/models")))
+        self.training_data_path_edit.setText(params.get("training_data_path", os.path.abspath("./build/data/training")))
+        self.augmented_data_path_edit.setText(params.get("augmented_data_path", os.path.abspath("./build/data/augmented")))
+        self.configuration_changed.emit()
+
     def connect_signals(self):
         self.model_path_edit.textChanged.connect(self.configuration_changed)
         self.training_data_path_edit.textChanged.connect(self.configuration_changed)
@@ -73,10 +87,3 @@ class FileSavingWidget(QWidget):
         directory = QFileDialog.getExistingDirectory(self, "Select Directory", line_edit.text())
         if directory:
             line_edit.setText(directory)
-
-    def get_parameters(self):
-        return {
-            "model_save_path": self.model_path_edit.text(),
-            "training_data_path": self.training_data_path_edit.text(),
-            "augmented_data_path": self.augmented_data_path_edit.text(),
-        }
