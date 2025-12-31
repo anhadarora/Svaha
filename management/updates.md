@@ -1,4 +1,4 @@
-# Svaha: Update Log
+# Svaha: Updates
 
 #### Created at: 1:37 AM on November 18, 2025 at Home
 
@@ -178,19 +178,68 @@ Completed a major refactoring of the Trainer Setup UI to create a more intuitive
 
 ### 07:51 PM | December 10, 2025 | Wednesday | Home
 
-## Implemented Fuzz Testing and Overhauled Trainer UI
+## Implemented Chaos Monkey Testing and Overhauled Trainer UI
 
-1.  **Fuzz Testing Infrastructure:**
+1.  **Chaos Monkey Infrastructure:**
     *   Added `pytest`, `pytest-qt`, and `pytest-json-report` to the project.
-    *   Created a `WizardWalker` class to perform automated "monkey testing" on the trainer setup wizard, randomly interacting with UI elements to find bugs.
-    *   Implemented a supervisor script (`run_fuzz_loop.py`) to run the fuzz test in a loop, detect crashes (segfaults), and save crash reports to a `crashes/` directory.
-    *   Added a VS Code launch configuration to easily run the fuzz testing loop from the debugger.
+    *   Created `Monkey` classes (like `TrainerMonkey`) to perform automated "chaos testing" on the wizard, randomly interacting with UI elements to find bugs.
+    *   Implemented a supervisor script (`run_chaos_monkey.py`) to run the chaos test in a loop, detect crashes (segfaults), and save crash reports to a `crashes/` directory.
+    *   Added a VS Code launch configuration to easily run the chaos loop from the debugger.
 
 2.  **Trainer UI/UX Overhaul:**
     *   **Fully Connected Pipeline:** Implemented the backend `TrainingWorker` and connected it to the UI. The "Monitor" tab now shows live plot updates during a training run.
     *   **Functional Results & History:** The "Results" and "History" tabs are now fully functional, loading and displaying data from completed runs.
-    *   **Dynamic UI Logic:** Added logic to the "Error Correction" step to show different parameters based on the selected chart type.
+    *   **Dynamic UI Logic:** Added logic to the 'Error Correction' step to show different parameters based on the selected chart type.
     *   **UI Polish:** Fixed various layout and spacing issues to improve UI density and corrected the "Apply and Run" button text to prevent rendering issues.
 
 3.  **Downloader UI Refactor:**
     *   Redesigned the Downloader screen with a tabbed interface to clearly separate "New Job" from "Resume Job" workflows, improving usability.
+
+---
+
+---
+
+### 08:37 AM | December 21, 2025 | Sunday | Home
+
+## Implement Dynamic 2D Plane and Production-Ready Features
+
+1.  **Core Feature: Dynamic 2D Plane**
+    *   Implements `DynamicPlaneProcessor` to transform time-series data into motion-compensated vector space using PCA.
+    *   Integrates processor into `TrainingWorker` for parallel data pipeline and LSTM modeling.
+    *   Adds 'decoder' for inverse-transforming model outputs back to scalar price movements.
+    *   Enables K-Fold cross-validation for the Dynamic Plane pipeline.
+
+2.  **Trainer UI and Workflow Enhancements:**
+    *   **Monitor Tab:** Dynamic monitoring of model configuration with real-time plots for loss and accuracy of every active prediction head.
+    *   **Results Tab:** Dynamic visualization of training output (scatter plots for regression, confusion matrices for classification).
+    *   **History Tab:** 
+        *   Added 'Reload Configuration' to load parameters from past runs.
+        *   Added 'Compare Selected Runs' for side-by-side parameter comparison.
+    *   **Setup Tab:** Background-threaded disk space calculator; removed unsupported 'Swin-Transformer' and 'Point & Figure' options.
+
+3.  **Charting and Image Generation:**
+    *   Implemented 'Hollow Candlestick' rendering.
+    *   Added support for Moving Average overlays and Volume subplots.
+    *   Implemented 'Renko' charts via `stocktrends`.
+
+---
+
+---
+
+### 03:00 PM | December 31, 2025 | Wednesday | Home
+
+## Refactored Management Structure and Chaos Monkey Terminology
+
+1.  **Management Directory Structure:**
+    *   Centralized all governance documents into a new `management/` directory.
+    *   Created `management/mcp.json` (Management Context Protocol) to serve as a navigable index for the agent.
+    *   Established `.cursorrules` at the project root as the single source of truth for agent bootstrapping.
+
+2.  **Chaos Monkey Refactor:**
+    *   Renamed all "Phoenix" and "Fuzz Testing" terminology to "Chaos Monkey".
+    *   Refactored `WizardWalker` class to `Monkey` classes (e.g., `TrainerMonkey`).
+    *   Renamed supervisor scripts to `run_chaos_monkey.py` and updated all test/history filenames.
+
+3.  **Sync Protocol:**
+    *   Created `management/sync.md` to formally document the `git` synchronization workflow.
+    *   Enforced a new rule: Commit messages must strictly match the `updates.md` entry in content and tone.

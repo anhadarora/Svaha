@@ -134,7 +134,7 @@ class RunOutputWidget(QWidget):
         short_id = hasher.hexdigest()[:12]
         
         self.experiment_name.blockSignals(True)
-        self.experiment_.setText(short_id)
+        self.experiment_name.setText(short_id)
         self.experiment_name.blockSignals(False)
         
         self.revert_button.setVisible(False)

@@ -1,0 +1,30 @@
+{
+    "description": "Svaha Management Context Protocol (MCP). This file serves as the directory for all project governance documents.",
+    "version": "1.0",
+    "resources": {
+        "vision": {
+            "path": "management/vision.md",
+            "description": "The North Star: Project Vision, Architecture, and Roadmap."
+        },
+        "rules": {
+            "path": ".cursorrules",
+            "description": "The Agent's Operating System: Protocols, Workflow Rules, and Bootstrap instructions."
+        },
+        "updates": {
+            "path": "management/updates.md",
+            "description": "The Changelog: History of all completed work and decisions."
+        },
+        "chaos_monkey": {
+            "path": "management/chaos_monkey.md",
+            "description": "Protocol for Chaos Monkey Testing and Robustness checking."
+        },
+        "logger": {
+            "path": "management/logger.md",
+            "description": "Standards and implementation details for Application Logging."
+        },
+        "sync": {
+            "path": "management/sync.md",
+            "description": "Protocols for synchronizing with the remote repository."
+        }
+    }
+}

@@ -1,15 +1,12 @@
 {
     "interval": "All Intervals",
     "instruments": [
-        "RELIANCE"
+        "ACMESOLAR"
     ],
-    "master_start_date": "2000-01-01",
-    "master_end_date": "2000-01-01",
-    "validation_method": "Date Range",
-    "training_start_date": "2000-01-01",
-    "training_end_date": "2000-01-01",
-    "validation_start_date": "2000-01-01",
-    "validation_end_date": "2000-01-01",
+    "master_start_date": "2025-11-11",
+    "master_end_date": "2025-11-20",
+    "validation_method": "Percentage Split",
+    "validation_percentage": 20,
     "resampling_factor": 1,
     "input_window_size": 5,
     "prediction_horizon": 1,
@@ -35,7 +32,7 @@
         }
     },
     "backbone": {
-        "architecture": "ViT-Base-Patch16",
+        "architecture": "EfficientNet-B7",
         "pretrained": true,
         "freeze": true
     },
@@ -86,5 +83,5 @@
         "Correction Factor Trace": true,
         "Input Snapshots (Sample)": true
     },
-    "experiment_name": "4d9f5c7fc71c"
+    "experiment_name": "cd468e0d965b"
 }

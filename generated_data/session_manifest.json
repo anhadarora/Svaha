@@ -1,7 +1,11 @@
 {
     "pending": [],
-    "completed": [],
-    "failed": [
-        "TCS"
-    ]
+    "completed": [
+        "ACMESOLAR",
+        "AIAENG",
+        "APLAPOLLO",
+        "AUBANK",
+        "AWL"
+    ],
+    "failed": []
 }

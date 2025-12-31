@@ -52,7 +52,10 @@ if __name__ == "__main__":
     # Initialize logging as the first step
     logger.setup_run_logger()
 
-    app = QApplication(sys.argv)
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+
 
     # --- Tooltip System Setup ---
     tooltip_manager = TooltipManager()

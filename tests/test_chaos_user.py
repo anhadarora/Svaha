@@ -4,7 +4,7 @@ import json
 import os
 from PySide6.QtCore import Qt
 
-from tests.ui_fuzzer import UserWalker
+from tests.chaos_monkey import UserMonkey
 
 def test_user_scenarios(main_window, qtbot):
     """
@@ -15,13 +15,13 @@ def test_user_scenarios(main_window, qtbot):
     # --- Test Setup ---
     seed_value = time.time()
     random.seed(seed_value)
-    print(f"Fuzz test running with seed: {seed_value}")
+    print(f"Chaos Monkey running with seed: {seed_value}")
 
     # Wait for the main window to run its auto-login check
     qtbot.wait(500) 
 
     # --- Execution ---
-    walker = UserWalker(main_window, qtbot)
+    walker = UserMonkey(main_window, qtbot)
     walker.history.append(f"Seed for this run: {seed_value}")
 
     try:
@@ -30,15 +30,15 @@ def test_user_scenarios(main_window, qtbot):
     
     finally:
         # --- Reporting ---
-        report_path = os.path.abspath("./fuzz_history_user.json")
-        print(f"Writing fuzz history to {report_path}")
+        report_path = os.path.abspath("./chaos_history_user.json")
+        print(f"Writing chaos history to {report_path}")
         try:
             with open(report_path, "w") as f:
                 json.dump(walker.history, f, indent=4)
         except Exception as e:
-            print(f"Error writing fuzz history file: {e}")
+            print(f"Error writing chaos history file: {e}")
 
     # --- Assertion ---
     assert walker.all_scenarios_passed, \
-        f"One or more user fuzzing scenarios failed. " \
+        f"One or more user chaos scenarios failed. " \
         f"Check {os.path.basename(report_path)} with seed {seed_value} for details."

@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 from PySide6.QtCore import Qt
 from datetime import datetime
 
-from tests.ui_fuzzer import DownloaderWalker
+from tests.chaos_monkey import DownloaderMonkey
 
 def test_fuzz_downloader_scenarios(main_window, qtbot):
     """
@@ -19,7 +19,7 @@ def test_fuzz_downloader_scenarios(main_window, qtbot):
     # --- Test Setup ---
     seed_value = time.time()
     random.seed(seed_value)
-    print(f"Fuzz test running with seed: {seed_value}")
+    print(f"Chaos Monkey running with seed: {seed_value}")
 
     # Wait for the downloader's internal data to load
     # This is crucial as it populates the symbol lists.
@@ -53,16 +53,16 @@ def test_fuzz_downloader_scenarios(main_window, qtbot):
     
     finally:
         # --- Reporting ---
-        report_path = os.path.abspath("./fuzz_history_downloader.json")
-        print(f"Writing fuzz history to {report_path}")
+        report_path = os.path.abspath("./chaos_history_downloader.json")
+        print(f"Writing chaos history to {report_path}")
         try:
             with open(report_path, "w") as f:
                 json.dump(walker.history, f, indent=4)
         except Exception as e:
-            print(f"Error writing fuzz history file: {e}")
+            print(f"Error writing chaos history file: {e}")
 
     # --- Assertion ---
     # The assertion will be based on the scenarios' success, recorded by the walker.
     assert walker.all_scenarios_passed, \
-        f"One or more downloader fuzzing scenarios failed. " \
-        f"Check fuzz_history_downloader.json with seed {seed_value} for details."
+        f"One or more downloader chaos scenarios failed. " \
+        f"Check chaos_history_downloader.json with seed {seed_value} for details."

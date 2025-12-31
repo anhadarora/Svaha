@@ -4,9 +4,9 @@ import json
 from PySide6.QtWidgets import QComboBox, QSpinBox, QCheckBox, QDateEdit, QLineEdit, QListWidget
 from PySide6.QtCore import Qt, QDate
 
-class TrainerWalker:
+class TrainerMonkey:
     """
-    A utility to run automated test scenarios on the TrainerScreen's setup wizard.
+    A utility to run automated 'Chaos Monkey' scenarios on the TrainerScreen's setup wizard.
     This has been refactored to run a series of permutations.
     """
 
@@ -124,9 +124,9 @@ class TrainerWalker:
             self._log_scenario_end(name, success, reason)
 
 
-class DownloaderWalker:
+class DownloaderMonkey:
     """
-    A utility to run automated test scenarios on the DownloaderScreen.
+    A utility to run automated 'Chaos Monkey' scenarios on the DownloaderScreen.
     This has been refactored to run a series of permutations.
     """
 
@@ -274,9 +274,9 @@ class DownloaderWalker:
             self._cleanup_generated_files()
 
 
-class UserWalker:
+class UserMonkey:
     """
-    A utility to run automated test scenarios on the UserScreen.
+    A utility to run automated 'Chaos Monkey' scenarios on the UserScreen.
     """
 
     def __init__(self, main_window, qtbot):

@@ -7,13 +7,13 @@ import shutil
 
 def create_repro_test(crash_log_path):
     """
-    Creates a reproducible test case from a fuzz crash log.
+    Creates a reproducible test case from a chaos monkey crash log.
 
     Args:
         crash_log_path (str): The path to the crash log JSON file.
     """
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    template_path = os.path.join(project_root, 'tests', 'test_fuzz_trainer.py')
+    template_path = os.path.join(project_root, 'tests', 'test_chaos_trainer.py')
     repro_dir = os.path.join(project_root, 'tests', 'repro')
 
     # 1. Ensure the template file exists
@@ -65,7 +65,7 @@ def create_repro_test(crash_log_path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Create a reproducible test case from a fuzz crash log."
+        description="Create a reproducible test case from a chaos monkey crash log."
     )
     parser.add_argument(
         "crash_log",

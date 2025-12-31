@@ -1,0 +1,17 @@
+# AI Rules & Workflow
+
+This document defines the operating procedures for the AI agent working on the Svaha project.
+
+## Session Startup Protocol
+At the beginning of **every** chat session, the AI must perform the following steps in order:
+
+1.  **Read `management/vision.md`**: Review the project vision, technology stack, and architectural definitions to ground the session in the project's reality.
+2.  **Read `management/mcp.json`**: Load the Management Context Protocol to discover all available governance resources (like `chaos_monkey` and `logger`).
+3.  **Read `management/updates.md`**: Review the history of completed work to understand recent progress.
+4.  **Corroborate Update Log**: Check the latest git commit messages (using `git log`) to verify if `management/updates.md` is up to date. If there are discrepancies, update the log immediately.
+
+## Ongoing Rules
+-   **Vision Alignment**: All proposed changes must align with the vision defined in `management/vision.md`.
+-   **Documentation**:
+    -   Keep `management/updates.md` updated with significant changes.
+    -   If the fundamental architecture changes, update `management/vision.md` accordingly.
