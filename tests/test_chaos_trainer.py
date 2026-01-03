@@ -2,10 +2,10 @@ import time
 import random
 import json
 import os
-from unittest.mock import patch
+# from unittest.mock import patch # REMOVED: No mocking allowed
 from PySide6.QtCore import Qt
 
-from tests.chaos_monkey import TrainerMonkey
+from tests.chaos_monkey import TrainerMonkey, TrainerResultsMonkey, TrainerHistoryMonkey
 
 def test_trainer_scenarios(main_window, qtbot):
     """
@@ -28,10 +28,22 @@ def test_trainer_scenarios(main_window, qtbot):
     walker.history.append(f"Seed for this run: {seed_value}")
 
     try:
-        # We only patch QMessageBox.exec to prevent the success dialog 
-        # from blocking the test run. The TrainingWorker will be real.
-        with patch('PySide6.QtWidgets.QMessageBox.exec', return_value=None):
-            walker.run_scenarios()
+        # NO MOCKS: Running with full system integration
+        walker.run_scenarios()
+        
+        # If the trainer run was successful, we should now be reachable for Results verification
+        results_monkey = TrainerResultsMonkey(main_window, qtbot)
+        results_monkey.run_scenarios()
+        walker.history.extend(results_monkey.history) # augment main history
+        if not results_monkey.all_scenarios_passed:
+            walker.all_scenarios_passed = False
+
+        # Now test History Tab interactions
+        history_monkey = TrainerHistoryMonkey(main_window, qtbot)
+        history_monkey.run_scenarios()
+        walker.history.extend(history_monkey.history) # augment main history
+        if not history_monkey.all_scenarios_passed:
+            walker.all_scenarios_passed = False
     
     finally:
         # --- Reporting ---

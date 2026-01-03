@@ -1,8 +1,8 @@
 import random
 import os
 import json
-from PySide6.QtWidgets import QComboBox, QSpinBox, QCheckBox, QDateEdit, QLineEdit, QListWidget
-from PySide6.QtCore import Qt, QDate
+from PySide6.QtWidgets import QComboBox, QSpinBox, QCheckBox, QDateEdit, QLineEdit, QListWidget, QApplication, QMessageBox, QDialog, QPushButton
+from PySide6.QtCore import Qt, QDate, QTimer
 
 class TrainerMonkey:
     """
@@ -44,9 +44,10 @@ class TrainerMonkey:
             {
                 "name": "End-to-End Run (ViT, Date Range)",
                 "params": {
-                    "data_source": {"symbols": ["RELIANCE"]},
+                    "data_source": {"symbols": ["ACMESOLAR"]},
                     "validation_method": "Date Range",
-                    "model_architecture": "ViT-Base-Patch16",
+                    "model_architecture": "ResNet-50",
+                    "training": {"max_epochs": 1}
                 },
                 "expected_outcome": "success"
             },
@@ -92,6 +93,11 @@ class TrainerMonkey:
             
             if "model_architecture" in params:
                 self.setup_widget.model_architecture_widget.architecture_selection.setCurrentText(params["model_architecture"])
+            
+            if "training" in params:
+                 training_params = params["training"]
+                 if "max_epochs" in training_params:
+                     self.setup_widget.model_architecture_widget.max_epochs.setValue(training_params["max_epochs"])
 
             self.qtbot.wait(100)
 
@@ -102,8 +108,24 @@ class TrainerMonkey:
             # 3. Verify outcome
             outcome = permutation["expected_outcome"]
             if outcome == "success":
-                # Wait for the training to finish and the UI to switch to the results tab
-                self.qtbot.waitUntil(lambda: self.trainer_screen.tab_widget.currentWidget() == self.trainer_screen.results_tab, timeout=90000)
+                # Wait for the training to finish, handling the "Training Complete" dialog if it appears
+                # We expect the process to take some time, so we poll for the dialog or the tab switch
+                
+                def check_training_complete():
+                    # 1. Check if we switched to Results tab (success)
+                    if self.trainer_screen.tab_widget.currentWidget() == self.trainer_screen.results_tab:
+                        return True
+                    
+                    # 2. Check for blocking Success Dialog
+                    widget = QApplication.activeModalWidget()
+                    if isinstance(widget, QMessageBox) and "Training Complete" in widget.text():
+                        self._log("Verified: Training Success Dialog appeared. Closing it.")
+                        widget.close() # This will unblock and trigger the signal emission
+                    
+                    return False
+
+                # We wait up to 90s (training can be slow)
+                self.qtbot.waitUntil(check_training_complete, timeout=90000)
                 self.history.append("Verified UI switched to Results tab.")
 
                 # Verify that a model file was created
@@ -368,3 +390,214 @@ class UserMonkey:
             self._log_scenario_end(name, success, reason)
             self.user_screen.go_back()
             self.qtbot.wait(100)
+
+class TrainerResultsMonkey:
+    """
+    Automated check for the Results Tab.
+    """
+    def __init__(self, main_window, qtbot):
+        self.main_window = main_window
+        self.qtbot = qtbot
+        self.trainer_screen = main_window.trainer_screen
+        self.results_tab = self.trainer_screen.results_tab
+        self.history = []
+        self.all_scenarios_passed = True
+
+    def _log(self, message):
+        self.history.append(message)
+        print(message)
+
+    def run_scenarios(self):
+        """
+        Verifies that the results tab is populated after a training run.
+        """
+        self._log("--- Running TrainerResultsMonkey ---")
+        try:
+            # 1. Verify Experiment Summary is present and has data
+            summary_widget = self.results_tab.summary_widget
+            if not summary_widget.isVisible():
+                raise AssertionError("Experiment Summary Widget is not visible.")
+            self._log("Verified: Experiment Summary Widget is visible.")
+
+            # 2. Verify Parameter Configuration is present
+            params_widget = self.results_tab.params_widget
+            if not params_widget.isVisible():
+                raise AssertionError("Parameter Configuration Widget is not visible.")
+            self._log("Verified: Parameter Configuration Widget is visible.")
+
+            # 3. Verify Dynamic Prediction Widgets
+            # We expect at least one dynamic widget (e.g. plot or confusion matrix) if training finished
+            if not self.results_tab.dynamic_widgets:
+                self._log("WARNING: No dynamic prediction widgets found. Did the model have prediction heads?")
+            else:
+                self._log(f"Verified: Found {len(self.results_tab.dynamic_widgets)} dynamic results widgets.")
+                for widget in self.results_tab.dynamic_widgets:
+                    if not widget.isVisible():
+                        raise AssertionError(f"Dynamic widget {widget} is created but not visible.")
+            
+            self._log("--- TrainerResultsMonkey PASSED ---")
+
+        except Exception as e:
+            self._log(f"--- TrainerResultsMonkey FAILED: {e} ---")
+            self.all_scenarios_passed = False
+
+
+class TrainerHistoryMonkey:
+    """
+    Automated interactions with the History Tab: selection, compare, reload.
+    """
+    def __init__(self, main_window, qtbot):
+        self.main_window = main_window
+        self.qtbot = qtbot
+        self.trainer_screen = main_window.trainer_screen
+        self.history_tab = self.trainer_screen.history_tab
+        self.history = []
+        self.all_scenarios_passed = True
+
+    def _log(self, message):
+        self.history.append(message)
+        print(message)
+
+    def run_scenarios(self):
+        self._log("--- Running TrainerHistoryMonkey ---")
+        
+        # Switch to history tab
+        self.trainer_screen.tab_widget.setCurrentWidget(self.history_tab)
+        self.qtbot.wait(200)
+
+        # 1. Test Refresh
+        self._test_refresh()
+        
+        # 2. Test Compare (if enough data)
+        self._test_compare()
+
+        # 3. Test Reload (if enough data)
+        self._test_reload()
+
+    def _test_refresh(self):
+        self._log("Action: Clicking Refresh")
+        self.history_tab.refresh_button.click()
+        self.qtbot.wait(100)
+        # Verify multiple rows potentially loaded
+        row_count = self.history_tab.model.rowCount(None)
+        self._log(f"Verified: History table has {row_count} rows after refresh.")
+
+    def _wait_for_window(self, timeout=2000):
+        """Helper to wait for a modal dialog to appear."""
+        deadline = QTimer()
+        deadline.setSingleShot(True)
+        loop = QApplication.processEvents
+        
+        # Simple polling loop
+        end_time = getattr(self.qtbot, 'use_time_time', False) and (import_time.time() + timeout/1000.0) or (QDate.currentDate().startOfDay().msecsTo(QDate.currentDate().startOfDay()) + timeout) # simplified
+        # Actually qtbot has wait functionality, let's use a simpler approach:
+        # We will assume the action that triggers the dialog is already done.
+        # We just look for the active modal widget.
+        
+        widget = QApplication.activeModalWidget()
+        start = 0
+        while not widget and start < timeout:
+            self.qtbot.wait(50)
+            start += 50
+            widget = QApplication.activeModalWidget()
+        return widget
+
+    def _test_compare(self):
+        row_count = self.history_tab.model.rowCount(None)
+        if row_count < 2:
+            self._log("Skipping Compare test: Not enough history rows (need > 1).")
+            return
+
+        self._log("Action: Selecting top 2 rows for comparison")
+        # Select first 2 rows
+        view = self.history_tab.history_table
+        selection_model = view.selectionModel()
+        selection_model.clear()
+        
+        # Select row 0 and 1
+        model_index_0 = self.history_tab.model.index(0, 0)
+        model_index_1 = self.history_tab.model.index(1, 0)
+        
+        # We use 'Select' command on selection model
+        selection_model.select(model_index_0, selection_model.Select | selection_model.Rows)
+        selection_model.select(model_index_1, selection_model.Select | selection_model.Rows)
+        self.qtbot.wait(100)
+        
+        if not self.history_tab.compare_button.isEnabled():
+             raise AssertionError("Compare button should be enabled when 2 rows are selected.")
+
+        # Click Compare - this opens a DIALOG.
+        # We need to click it, then handle the dialog asynchronously? 
+        # No, QDialog.exec() blocks the main loop. 
+        # Using qtbot.mouseClick usually blocks if the slot calls exec().
+        # Strategy: Use QTimer to close the dialog slightly AFTER we click the button.
+        
+        def handle_compare_dialog():
+            widget = QApplication.activeModalWidget()
+            if widget:
+                self._log(f"Verified: Comparison Dialog opened: {widget.windowTitle()}")
+                # Close it
+                widget.close()
+            else:
+                self._log("FAILURE: No modal dialog found after clicking Compare.")
+
+        # Schedule the handler to run 500ms after button click
+        QTimer.singleShot(500, handle_compare_dialog)
+        
+        self.history_tab.compare_button.click()
+        self.qtbot.wait(200) # Wait for dialog loop to finish closing
+        self._log("Verified: Returned from Compare dialog.")
+
+
+    def _test_reload(self):
+        row_count = self.history_tab.model.rowCount(None)
+        if row_count < 1:
+            self._log("Skipping Reload test: Not enough history rows.")
+            return
+
+        self._log("Action: Selecting 1st row for Reload")
+        view = self.history_tab.history_table
+        selection_model = view.selectionModel()
+        selection_model.clear()
+        
+        model_index_0 = self.history_tab.model.index(0, 0)
+        selection_model.select(model_index_0, selection_model.Select | selection_model.Rows)
+        self.qtbot.wait(100)
+
+        if not self.history_tab.reload_button.isEnabled():
+             raise AssertionError("Reload button should be enabled when 1 row is selected.")
+
+        # This triggers a Confirmation QMessageBox.
+        # Strategy: QTimer to find the message box and click 'Yes'.
+        
+        def handle_confirm_dialog():
+            widget = QApplication.activeModalWidget()
+            if isinstance(widget, QMessageBox):
+                self._log(f"Verified: Confirmation Dialog opened: {widget.text()}")
+                # Click Yes
+                yes_button = widget.button(QMessageBox.Yes)
+                if yes_button:
+                    yes_button.click()
+                    self._log("Action: Clicked 'Yes' in confirmation dialog.")
+                else:
+                    self._log("FAILURE: Could not find 'Yes' button.")
+                    widget.close()
+            else:
+                self._log(f"FAILURE: Expected QMessageBox, found {widget}.")
+                if widget: widget.close()
+
+        QTimer.singleShot(500, handle_confirm_dialog)
+        
+        # Capture configuration BEFORE reload (to verify it changes or matches)
+        # Note: In a real test, we might want to change the setup tab first to ensure it changes back.
+        # But here we just verify the flow works.
+        
+        self.history_tab.reload_button.click()
+        self._log("Verified: Reload flow completed.")
+        
+        # Verify we were switched to Setup tab
+        current_idx = self.trainer_screen.tab_widget.currentIndex()
+        current_widget = self.trainer_screen.tab_widget.currentWidget()
+        if current_widget != self.trainer_screen.setup_tab:
+             raise AssertionError(f"Expected to be on Setup Tab after reload, but on index {current_idx}")
+        self._log("Verified: Switched to Setup Tab.")

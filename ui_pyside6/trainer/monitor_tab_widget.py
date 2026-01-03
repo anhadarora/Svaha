@@ -148,6 +148,7 @@ class MonitorTabWidget(QWidget):
                     self._update_ui_with_metrics(message.get("data"))
                 elif msg_type == "finished":
                     self._on_training_finished(message.get("data"))
+                    return # Stop processing queue as it is now None
         except Empty:
             pass
         except Exception as e:

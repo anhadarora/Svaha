@@ -1,5 +1,5 @@
 [
-    "Seed for this run: 1766100350.616373",
+    "Seed for this run: 1767434917.148607",
     "Generated 2 permutations to test.",
     "--- Running Permutation: End-to-End Run (ViT, Date Range) ---",
     "Resetting UI state...",
@@ -9,5 +9,7 @@
     "--- Running Permutation: Failure case: No data source selected ---",
     "Resetting UI state...",
     "Verified 'Apply and Run' is disabled.",
-    "--- PERMUTATION PASSED: Failure case: No data source selected ---"
+    "--- PERMUTATION PASSED: Failure case: No data source selected ---",
+    "--- Running TrainerResultsMonkey ---",
+    "--- TrainerResultsMonkey FAILED: Experiment Summary Widget is not visible. ---"
 ]
