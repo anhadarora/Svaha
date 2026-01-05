@@ -290,3 +290,15 @@ Completed a major refactoring of the Trainer Setup UI to create a more intuitive
     *   Renamed all historical logs in `logs/` from `svaha_*.log` to `scova_*.log`.
 3.  **Documentation**:
     *   Updated all documentation to reflect the new name.
+
+---
+
+---
+
+### 12:26 AM | January 06, 2026 | Tuesday | Home
+
+## Fixed Startup Path Issues
+
+1.  **Absolute Path Resolution**:
+    *   Updated `main_pyside.py`, `ui_pyside6/pre_training/file_saving_widget.py`, `ui_pyside6/history/history_widget.py`, and `ui_pyside6/widgets/tooltip_system.py` to use absolute paths based on `__file__`.
+    *   Resolved `FileNotFoundError` crashes caused by accessing relative paths (like `theme.qss`, `tooltips.json`, and build directories) from a different working directory.

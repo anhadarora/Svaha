@@ -67,11 +67,14 @@ class TooltipManager:
             self._initialized = True
 
     def load_tooltips(self, filepath="tooltips.json"):
+        # Resolve absolute path relative to project root (2 levels up from widgets/tooltip_system.py)
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        final_path = os.path.join(project_root, filepath)
         try:
-            with open(filepath, "r") as f:
+            with open(final_path, "r") as f:
                 self.tooltip_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"[ERROR] Could not load or parse tooltip file: {e}")
+            print(f"[ERROR] Could not load or parse tooltip file at {final_path}: {e}")
             self.tooltip_data = {}
 
     def get_tooltip_for_widget(self, widget: QWidget):

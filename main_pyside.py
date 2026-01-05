@@ -65,11 +65,14 @@ if __name__ == "__main__":
     # --------------------------
 
     # Load and apply stylesheet
+    import os
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    theme_path = os.path.join(project_root, "ui_pyside6", "theme.qss")
     try:
-        with open("ui_pyside6/theme.qss", "r") as f:
+        with open(theme_path, "r") as f:
             app.setStyleSheet(f.read())
     except FileNotFoundError:
-        print("Stylesheet not found, using default styles.")
+        print(f"Stylesheet not found at {theme_path}, using default styles.")
 
     window = MainWindow()
     window.show()

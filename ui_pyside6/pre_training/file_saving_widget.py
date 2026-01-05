@@ -28,22 +28,23 @@ class FileSavingWidget(QWidget):
 
         layout = QVBoxLayout(group)
 
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
         self.model_path_edit = self._create_path_selector(
             layout, 
             "Model Save Path:", 
-            os.path.abspath("./build/models"),
+            os.path.join(project_root, "build", "models"),
             "model_save_path"
         )
         self.training_data_path_edit = self._create_path_selector(
             layout, 
             "Training Data (Images) Path:", 
-            os.path.abspath("./build/data/training"),
+            os.path.join(project_root, "build", "data", "training"),
             "training_data_path"
         )
         self.augmented_data_path_edit = self._create_path_selector(
             layout, 
             "Augmented Data Path:", 
-            os.path.abspath("./build/data/augmented"),
+            os.path.join(project_root, "build", "data", "augmented"),
             "augmented_data_path"
         )
 
@@ -55,9 +56,10 @@ class FileSavingWidget(QWidget):
         }
 
     def set_parameters(self, params: dict):
-        self.model_path_edit.setText(params.get("model_save_path", os.path.abspath("./build/models")))
-        self.training_data_path_edit.setText(params.get("training_data_path", os.path.abspath("./build/data/training")))
-        self.augmented_data_path_edit.setText(params.get("augmented_data_path", os.path.abspath("./build/data/augmented")))
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+        self.model_path_edit.setText(params.get("model_save_path", os.path.join(project_root, "build", "models")))
+        self.training_data_path_edit.setText(params.get("training_data_path", os.path.join(project_root, "build", "data", "training")))
+        self.augmented_data_path_edit.setText(params.get("augmented_data_path", os.path.join(project_root, "build", "data", "augmented")))
         self.configuration_changed.emit()
 
     def connect_signals(self):

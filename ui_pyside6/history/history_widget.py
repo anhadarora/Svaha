@@ -82,7 +82,8 @@ class HistoryWidget(QWidget):
         self.history_table.selectionModel().selectionChanged.connect(self._update_button_states)
 
     def load_history(self):
-        history_path = os.path.abspath("./build/history.json")
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+        history_path = os.path.join(project_root, "build", "history.json")
         self.details_view.setText("Select a run to view its full configuration.")
         
         if not os.path.exists(history_path):
