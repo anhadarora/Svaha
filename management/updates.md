@@ -1,4 +1,4 @@
-# Svaha: Updates
+# Scova: Updates
 
 #### Created at: 1:37 AM on November 18, 2025 at Home
 
@@ -274,3 +274,19 @@ Completed a major refactoring of the Trainer Setup UI to create a more intuitive
     *   Re-implemented the complete data loading, dataset generation, and model saving logic within `TrainingWorker` to restore functionality.
     *   Patched `MonitorTabWidget` to prevent race conditions during worker queue shutdown.
     *   Made `vit_keras` import conditional to allow the application to function on systems missing `tensorflow-addons`.
+
+---
+
+---
+
+### 12:25 AM | January 06, 2026 | Tuesday | Home
+
+## Renamed Project to Scova
+
+1.  **Global Renaming**:
+    *   Renamed the project from **Svaha** to **Scova**.
+    *   Performed comprehensive text replacement across the entire codebase.
+2.  **Log Management**:
+    *   Renamed all historical logs in `logs/` from `svaha_*.log` to `scova_*.log`.
+3.  **Documentation**:
+    *   Updated all documentation to reflect the new name.

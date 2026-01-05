@@ -1,7 +1,7 @@
 # Sync Protocols
 
 ## Overview
-This document outlines the standard procedures for synchronizing the local Svaha codebase with the remote repository.
+This document outlines the standard procedures for synchronizing the local Scova codebase with the remote repository.
 
 ## Pre-Sync Checklist
 1.  **Tests**: Ensure all relevant tests (including Chaos Monkey) pass locally.

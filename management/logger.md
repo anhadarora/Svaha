@@ -1,7 +1,7 @@
 # Logger Protocols
 
 ## Overview
-This document outlines the standards for application logging in Svaha. We use the standard Python `logging` library with a centralized configuration.
+This document outlines the standards for application logging in Scova. We use the standard Python `logging` library with a centralized configuration.
 
 ## Current Implementation
 -   **Initialization**: `lib/logger.py` acts as the central setup point.

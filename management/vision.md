@@ -1,7 +1,7 @@
-# Svaha: Project Vision
+# Scova: Project Vision
 
 ## 1. Project Vision
-Svaha is a high-performance, CNN-driven algorithmic training, and trading application. The goal is to create a unified ecosystem that seamlessly integrates data acquisition, model training, and paper trading, live trading, error-debugging, and compliance reporting into a single tailored desktop application. It prioritizes a "UI-First" approach to ensure complex workflows (like deep learning model configuration) are intuitive, reproducible, and error-resistant.
+Scova is a high-performance, CNN-driven algorithmic training, and trading application. The goal is to create a unified ecosystem that seamlessly integrates data acquisition, model training, and paper trading, live trading, error-debugging, and compliance reporting into a single tailored desktop application. It prioritizes a "UI-First" approach to ensure complex workflows (like deep learning model configuration) are intuitive, reproducible, and error-resistant.
 
 ## 2. Technology Stack
 -   **Language**: Python 3+

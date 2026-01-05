@@ -11,7 +11,7 @@ from ui_pyside6.widgets.tooltip_system import TooltipManager, TooltipEventFilter
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Svaha")
+        self.setWindowTitle("Scova")
 
         # ADD THIS LINE: Set a reasonable default size (Width, Height)
         self.resize(1280, 800)

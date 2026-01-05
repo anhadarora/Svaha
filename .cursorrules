@@ -1,6 +1,6 @@
 # AI Rules & Workflow
 
-This document defines the operating procedures for the AI agent working on the Svaha project.
+This document defines the operating procedures for the AI agent working on the Scova project.
 
 ## Session Startup Protocol
 At the beginning of **every** chat session, the AI must perform the following steps in order:

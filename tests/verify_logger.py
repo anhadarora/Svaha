@@ -21,7 +21,7 @@ def verify_logger():
     log_dir = os.path.join(os.path.dirname(__file__), "..", "logs")
     
     # Find the most recent log file
-    log_files = [f for f in os.listdir(log_dir) if f.startswith("svaha_run_") and f.endswith(".log")]
+    log_files = [f for f in os.listdir(log_dir) if f.startswith("scova_run_") and f.endswith(".log")]
     if not log_files:
         print("FAIL: No log files found.")
         return

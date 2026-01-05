@@ -27,7 +27,7 @@ class MainScreen(QMainWindow):
         super().__init__()
         self.session_manager = session_manager
         self.previous_widget_index = 1  # Default to trainer screen
-        self.setWindowTitle("Svaha")
+        self.setWindowTitle("Scova")
         self.setGeometry(100, 100, 1280, 800)
 
         # --- FONT LOADING ---
@@ -71,11 +71,11 @@ class MainScreen(QMainWindow):
                 50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
             ))
         else:
-            self.logo_label.setText("Svaha")
+            self.logo_label.setText("Scova")
             self.logo_label.setStyleSheet("color: white; font-size: 10px;")
 
         # --- B. APP NAME ---
-        self.app_name_label = QLabel("SVAHA")
+        self.app_name_label = QLabel("SCOVA")
         self.app_name_label.setStyleSheet(f"""
             font-family: '{self.custom_font_family}'; 
             font-size: 42px; 

@@ -13,7 +13,7 @@ def setup_run_logger():
         os.makedirs(log_dir)
 
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    log_file = os.path.join(log_dir, f"svaha_run_{timestamp}.log")
+    log_file = os.path.join(log_dir, f"scova_run_{timestamp}.log")
 
     # Get the root logger
     logger = logging.getLogger()
